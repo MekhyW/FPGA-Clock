@@ -1,0 +1,39 @@
+-- Copyright (C) 2017  Intel Corporation. All rights reserved.
+-- Your use of Intel Corporation's design tools, logic functions
+-- and other software and tools, and its AMPP partner logic
+-- functions, and any output files from any of the foregoing
+-- (including device programming or simulation files), and any
+-- associated documentation or information are expressly subject
+-- to the terms and conditions of the Intel Program License
+-- Subscription Agreement, the Intel Quartus Prime License Agreement,
+-- the Intel FPGA IP License Agreement, or other applicable license
+-- agreement, including, without limitation, that your use is for
+-- the sole purpose of programming logic devices manufactured by
+-- Intel and sold by Intel or its authorized distributors.  Please
+-- refer to the applicable agreement for further details.
+
+WIDTH=8;
+DEPTH=256;
+ADDRESS_RADIX=DEC;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+--endereco : dado;
+0 : 90E;	-- JSR @14		
+1 : 605;	-- JMP @5		
+2 : 709;	-- JEQ @9		
+3 : 000;	-- NOP
+4 : 000;	-- NOP
+5 : 405;	-- LDI $5		
+6 : 500;	-- STA $0		
+7 : 800;	-- CEQ @0		
+8 : 602;	-- JMP @2		
+9 : 000;	-- NOP
+10 : 404;	-- LDI $4		
+11 : 800;	-- CEQ @0		
+12 : 703;	-- JEQ @3		
+13 : 60D;	-- JMP @13		
+14 : B14;	-- OP_AND @20
+15 : 000;	-- NOP
+16 : A00;	-- RET			
+END;
