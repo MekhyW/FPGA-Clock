@@ -85,7 +85,7 @@ if __name__ == "__main__":
         print("CLI format error")
 
 
-noveBits = False;
+noveBits = True;
 
 #definição dos mnemônicos e seus
 #respectivo OPCODEs (em Hexadecimal)
@@ -103,6 +103,9 @@ mne =	{
        "RET":   "A",
        "OP_AND": "B", 
 }
+
+#Dicionario para salvar posicao das labels
+labelPos = {}
 
 #Converte o valor após o caractere arroba '@'
 #em um valor hexadecimal de 2 dígitos (8 bits)
@@ -149,6 +152,23 @@ def  converteCifrao9bits(line):
         line[1] = "\" & '0' & x\"" + line[1]
     line = ''.join(line)
     return line
+
+#Converte o valor apos o caracter '.' 
+#em um valor hexadecimal de 2 digitos
+#concatena com o bit habilita
+def convertePonto9bits(line):
+    line = line.split('.')
+    line[1] = labelPos[line[1]]
+    if(int(line[1]) > 255 ):
+        line[1] = str(int(line[1]) - 256)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & '1' & x\"" + line[1]
+    else:
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & '0' & x\"" + line[1]
+    line = ''.join(line)
+    return line
+
         
 #Define a string que representa o comentário
 #a partir do caractere cerquilha '#'
@@ -186,7 +206,14 @@ def defineLabel(line):
 
 with open(inputASM, "r") as f: #Abre o arquivo ASM
     lines = f.readlines() #Verifica a quantidade de linhas
-    
+    cnt = 0
+    for line in lines:
+        label = defineLabel(line)
+        if label != None:
+            labelPos[label] = cnt + 1 #JMP sempre pra linha dps da label
+        else:
+            cnt += 1
+
     
 with open(outputBIN, "w+") as f:  #Abre o destino BIN
 
@@ -205,7 +232,10 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
             #Exemplo de linha => 1. JSR @14 #comentario1
             comentarioLine = defineComentario(line).replace("\n","") #Define o comentário da linha. Ex: #comentario1
             instrucaoLine = defineInstrucao(line).replace("\n","") #Define a instrução. Ex: JSR @14
-            
+
+            if ':' in instrucaoLine:
+                continue
+
             instrucaoLine = trataMnemonico(instrucaoLine) #Trata o mnemonico. Ex(JSR @14): x"9" @14
                   
             if '@' in instrucaoLine: #Se encontrar o caractere arroba '@' 
@@ -219,6 +249,9 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
                     instrucaoLine = converteCifrao(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
                 else:
                     instrucaoLine = converteCifrao9bits(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
+
+            elif '.' in instrucaoLine:
+                instrucaoLine = convertePonto9bits(instrucaoLine)
                 
             else: #Senão, se a instrução nao possuir nenhum imediato, ou seja, nao conter '@' ou '$'
                 instrucaoLine = instrucaoLine.replace("\n", "") #Remove a quebra de linha
