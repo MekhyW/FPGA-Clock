@@ -52,7 +52,8 @@ signal auxK0 : std_logic;
 signal auxK1 : std_logic;
 signal k0_out : std_logic_vector(0 downto 0);
 signal k1_out : std_logic_vector(0 downto 0);
-signal k_reset : std_logic;
+signal k0_reset : std_logic;
+signal k1_reset : std_logic;
 
 signal Habilita_key0 : std_logic;
 signal Habilita_key1 : std_logic;
@@ -112,11 +113,11 @@ wr_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
 			 
 			 
 k0_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
-          port map (DIN => "1", DOUT => k0_out(0 downto 0), ENABLE => '1', CLK => auxK0, RST => k_reset);
+          port map (DIN => "1", DOUT => k0_out(0 downto 0), ENABLE => '1', CLK => auxK0, RST => k0_reset);
 
 			 
 k1_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
-          port map (DIN => "1", DOUT => k1_out(0 downto 0), ENABLE => '1', CLK => auxK1, RST => k_reset);
+          port map (DIN => "1", DOUT => k1_out(0 downto 0), ENABLE => '1', CLK => auxK1, RST => k1_reset);
 
 			 
 rd_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
@@ -223,7 +224,10 @@ Habilita_key2 <= (addrDec(2) and control_out(1) and blockDec(5) and data_addr(5)
 Habilita_key3 <= (addrDec(3) and control_out(1) and blockDec(5) and data_addr(5));
 Habilita_reset <= (addrDec(4) and control_out(1) and blockDec(5) and data_addr(5));
 
-k_reset <= (control_out(0) and data_addr(0) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
+k0_reset <= (control_out(0) and data_addr(0) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
+data_addr(6) and data_addr(7) and data_addr(8));
+
+k1_reset <= (control_out(0) and (not(data_addr(0))) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
 data_addr(6) and data_addr(7) and data_addr(8)); 
 
 end architecture;
