@@ -104,6 +104,28 @@ mne =	{
        "OP_AND": "B", 
 }
 
+io_addr =	{ 
+       "LEDS":   "256",
+       "LED8":   "257",
+       "LED9":   "258",
+       "HEX0":   "288",
+       "HEX1":   "289",
+       "HEX2":   "290",
+       "HEX3":   "291",
+       "HEX4":   "292",
+       "HEX5":   "293",
+       "SWS":    "320",
+       "SW8":    "321",
+       "SW9":    "322",
+       "K0":   "352",
+       "K1":   "353",
+       "K2":   "354",
+       "K3":   "355",
+       "RESET":   "356",
+       "CK0": "511",
+       "CK1": "510", 
+}
+
 #Dicionario para salvar posicao das labels
 labelPos = {}
 
@@ -158,7 +180,11 @@ def  converteCifrao9bits(line):
 #concatena com o bit habilita
 def convertePonto9bits(line):
     line = line.split('.')
-    line[1] = labelPos[line[1]]
+    if line[1] in io_addr.keys():
+        line[1] = io_addr[line[1]]
+    else:
+        line[1] = labelPos[line[1]]
+        
     if(int(line[1]) > 255 ):
         line[1] = str(int(line[1]) - 256)
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
