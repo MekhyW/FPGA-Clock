@@ -15,16 +15,210 @@ STA @3 #unidade de milhar
 STA @4 #dezena de milhar
 STA @5 #centena de milhar
 STA @6 #flag inibe contagem
-LDI $10
-STA @7 #cte 10 comparar e fazer carry dos digitos
-
-MAIN:
+STA @15 #cte 0 para saber se botao esta solto
 LDI $1
-CEQ .K0 #le k0
-JEQ .INC 
-JSR .ATUALIZA_DISPLAY
-LDI $1 #le k1
-CEQ .K1
-JEQ .ATUALIZA_LIMITE
-JSR .LIMITE
-JMP .MAIN
+STA @13 #cte 1 para incrementar
+LDI $10
+STA @7 #limite unidade
+STA @8 #limite dezena
+STA @9 #limite centena
+STA @10 #limite unidade de milhar
+STA @11 #limite dezena de milhar
+STA @12 #limite centena de milhar
+STA @14 #cte 10 para verificar estouro
+STA .CK0 #limpa k0
+STA .CK1 #limpa k1
+NOP
+MAIN:
+LDI $0 #carrega zero
+CEQ .K0  #ve se k0 esta pressionado
+JEQ .DEPOIS_DO_K0 #pula se estiver solto
+JSR .INC #incrementa contagem
+DEPOIS_DO_K0: 
+JSR .ATUALIZA_DISPLAY #atualiza info da memoria no display
+LDI $0 #carrega zero
+CEQ .K1 #ve se k1 esta pressionado
+JEQ .DEPOIS_DO_K1
+JSR .ATUALIZA_LIMITE #atualiza limite da contagem
+DEPOIS_DO_K1:
+JSR .LIMITE #verifica limite da contagem
+JMP .MAIN #volta para o inicio do laco
+NOP
+LIMITE:
+LDA @0 #carrega unidade
+CEQ @7 #compara com limite unidade
+JEQ .CONTINUA_UNIDADE #pula se for igual ou retorna
+RET 
+CONTINUA_UNIDADE:
+LDA @1 #carrega dezena
+CEQ @8 #compara com limite dezena
+JEQ .CONTINUA_DEZENA #pula se for igual ou retorna
+RET
+CONTINUA_DEZENA:
+LDA @2 #carrega centena
+CEQ @9 #compara com limite centena
+JEQ .CONTINUA_CENTENA #pula se for igual ou retorna
+RET
+CONTINUA_CENTENA:
+LDA @3 #carrega unidade de milhar
+CEQ @10 #compara com limite unidade de milhar
+JEQ .CONTINUA_U_MILHAR #pula se for igual ou retorna
+RET
+CONTINUA_U_MILHAR:
+LDA @4 #carrega dezena de milhar
+CEQ @11 #compara com limite dezena de milhar
+JEQ .CONTINUA_D_MILHAR #pula se for igual ou retorna
+RET
+CONTINUA_D_MILHAR:
+LDA @5 #carrega centena de milhar
+CEQ @12 #compara com limite centena de milhar
+JEQ .CONTINUA_C_MILHAR #pula se for igual ou retorna
+RET
+CONTINUA_C_MILHAR:
+LDI $1 #carrega 1 para ativar flag
+STA @6 #ativa flag inibe contagem
+STA .LED8 #ativa led limite atingido
+RET #retorna
+NOP
+ATUALIZA_DISPLAY:
+LDA @0 #carrega unidade
+STA .HEX0 #armazena em hex0
+LDA @1 #carrega dezena
+STA .HEX1 #armazena em hex1
+LDA @2 #carrega centena
+STA .HEX2 #armazena em hex2
+LDA @3 #carrega unidade de milhar
+STA .HEX3 #armazena em hex3
+LDA @4 #carrega dezena de milhar
+STA .HEX4 #armazena em hex4
+LDA @5 #carrega centena de milhar
+STA .HEX5 #armazena em hex5
+RET
+NOP
+INC:
+STA .CK0 #limpa K0
+LDI $0 #carrega zero
+CEQ @6 #compara com flag inibe contagem e retorna se for diferente de zero 
+JEQ .FAZ_CONTAGEM 
+RET
+FAZ_CONTAGEM:
+LDA @0 #carrega unidade
+SOMA @13 #soma com um
+STA @0 #armazena unidade
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_UN
+RET
+CARRY_UN:
+LDI $0 #carrega zero
+STA @0 #zera unidade
+LDA @1 #carrega dezena
+SOMA @13 #incrementa
+STA @1 #armazena dezena
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_D
+RET
+CARRY_D:
+LDI $0 #carrega zero
+STA @1 #zera dezena
+LDA @2 #carrega centena
+SOMA @13 #incrementa
+STA @2 #armazena centena
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_C
+RET
+CARRY_C:
+LDI $0 #carrega zero
+STA @2 #zera centena
+LDA @3 #carrega unidade de milhar
+SOMA @13 #incrementa
+STA @3 #armazena unidade de milhar
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_U_MILHAR
+RET
+CARRY_U_MILHAR:
+LDI $0 #carrega zero
+STA @3 #zera unidade de milhar
+LDA @4 #carrega dezena de milhar
+SOMA @13 #incrementa
+STA @4 #armazena dezena de milhar
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_D_MILHAR
+RET
+CARRY_D_MILHAR:
+LDI $0 #carrega zero
+STA @4 #zera dezena de milhar
+LDA @5 #carrega centena de milhar
+SOMA @13 #incrementa
+STA @5 #armazena centena de milhar
+CEQ @14 #compara com 10 para verificar estouro
+JEQ .CARRY_C_MILHAR
+RET
+CARRY_C_MILHAR:
+LDI $0 #carrega zero
+STA @5 #zera centena de milhar
+LDI $1 #carrega um
+STA .LED9 #acende led de estouro
+RET
+NOP
+ATUALIZA_LIMITE:
+LDI $1 #carrega um
+STA .LEDS #ativa led0 pra indicar unidade
+LDI $0 #carrega zero
+STA .LED8 #limpa led limite
+STA @6 #limpa flag inibe contagem
+STA .CK1 #limpa k1
+ESPERA_UN:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_UN
+LDA .SWS #carrega chaves
+STA @7 #armazena em limite unidades
+STA .CK1 #limpa k1
+LDI $2 #carrega 2
+STA .LEDS #ativa led1
+ESPERA_D:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_D
+LDA .SWS #carrega chaves
+STA @8 #armazena em limite dezena
+STA .CK1 #limpa k1
+LDI $4 #carrega 4
+STA .LEDS #ativa led2
+ESPERA_C:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_C
+LDA .SWS #carrega chaves
+STA @9 #armazena em limite centena
+STA .CK1 #limpa k1
+LDI $8 #carrega 8
+STA .LEDS #ativa led3
+ESPERA_U_MILHAR:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_U_MILHAR
+LDA .SWS #carrega chaves
+STA @10 #armazena em limite unidade de milhar
+STA .CK1 #limpa k1
+LDI $16 #carrega 16
+STA .LEDS #ativa led4
+ESPERA_D_MILHAR:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_D_MILHAR
+LDA .SWS #carrega chaves
+STA @11 #armazena em limite dezena de milhar
+STA .CK1 #limpa k1
+LDI $32 #carrega 32
+STA .LEDS #ativa led5
+ESPERA_C_MILHAR:
+LDA .K1 #carrega k1
+CEQ @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA_C_MILHAR
+LDA .SWS #carrega chaves
+STA @12 #armazena em limite centena de milhar
+STA .CK1 #limpa k1
+LDI $0 #carrega 0
+STA .LEDS #desativa leds
+RET

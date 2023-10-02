@@ -236,7 +236,7 @@ with open(inputASM, "r") as f: #Abre o arquivo ASM
     for line in lines:
         label = defineLabel(line)
         if label != None:
-            labelPos[label] = cnt + 1 #JMP sempre pra linha dps da label
+            labelPos[label] = cnt #JMP sempre pra linha dps da label
         else:
             cnt += 1
 
