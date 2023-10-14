@@ -85,7 +85,7 @@ if __name__ == "__main__":
         print("CLI format error")
 
 
-noveBits = True;
+dezBits = True;
 
 #definição dos mnemônicos e seus
 #respectivo OPCODEs (em Hexadecimal)
@@ -101,7 +101,7 @@ mne =	{
        "CEQ":   "8",
        "JSR":   "9",
        "RET":   "A",
-       "OP_AND": "B", 
+       "OP_AND": "B",
 }
 
 io_addr =	{ 
@@ -126,6 +126,13 @@ io_addr =	{
        "CK1": "510", 
 }
 
+reg_sel =    {
+    'R0': '0',
+    'R1': '1',
+    'R2': '2',
+    'R3': '3',
+}
+
 #Dicionario para salvar posicao das labels
 labelPos = {}
 
@@ -140,15 +147,24 @@ def  converteArroba(line):
 #Converte o valor após o caractere arroba '@'
 #em um valor hexadecimal de 2 dígitos (8 bits) e...
 #concatena com o bit de habilita 
-def  converteArroba9bits(line):
+def  converteArroba10bits(line):
     line = line.split('@')
-    if(int(line[1]) > 255 ):
+
+    if (int(line[1]) > 1023):
+        line[1] = str(int(line[1]) - 1024)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & \"11\" & x\"" + line[1]
+    elif (int(line[1]) > 511):
+        line[1] = str(int(line[1]) - 512)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & \"10\" & x\"" + line[1]
+    elif (int(line[1]) > 255 ):
         line[1] = str(int(line[1]) - 256)
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '1' & x\"" + line[1]
+        line[1] = "\" & \"01\" & x\"" + line[1]
     else:
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '0' & x\"" + line[1]
+        line[1] = "\" & \"00\" & x\"" + line[1]
     line = ''.join(line)
     return line
  
@@ -163,36 +179,75 @@ def  converteCifrao(line):
 #Converte o valor após o caractere arroba '$'
 #em um valor hexadecimal de 2 dígitos (8 bits) e...
 #concatena com o bit de habilita 
-def  converteCifrao9bits(line):
+def  converteCifrao10bits(line):
     line = line.split('$')
-    if(int(line[1]) > 255 ):
+    if (int(line[1]) > 1023):
+        line[1] = str(int(line[1]) - 1024)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & \"11\" & x\"" + line[1]
+    elif (int(line[1]) > 511):
+        line[1] = str(int(line[1]) - 512)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        line[1] = "\" & \"10\" & x\"" + line[1]
+    elif (int(line[1]) > 255 ):
         line[1] = str(int(line[1]) - 256)
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '1' & x\"" + line[1]
+        line[1] = "\" & \"01\" & x\"" + line[1]
     else:
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '0' & x\"" + line[1]
+        line[1] = "\" & \"00\" & x\"" + line[1]
     line = ''.join(line)
     return line
 
 #Converte o valor apos o caracter '.' 
 #em um valor hexadecimal de 2 digitos
 #concatena com o bit habilita
-def convertePonto9bits(line):
+def convertePonto10bits(line):
     line = line.split('.')
     if line[1] in io_addr.keys():
         line[1] = io_addr[line[1]]
     else:
         line[1] = labelPos[line[1]]
-        
-    if(int(line[1]) > 255 ):
+    if (int(line[1]) > 1023):
+        line[1] = str(int(line[1]) - 1024)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        if '"' in line[0]:
+            line[1] = "\" & \"11\" & x\"" + line[1]
+        else:
+            line[1] = " & \"11\" & x\"" + line[1]
+    elif (int(line[1]) > 511):
+        line[1] = str(int(line[1]) - 512)
+        line[1] = hex(int(line[1]))[2:].upper().zfill(2)
+        if '"' in line[0]:
+            line[1] = "\" & \"10\" & x\"" + line[1]
+        else:
+            line[1] = " & \"10\" & x\"" + line[1]
+    elif (int(line[1]) > 255 ):
         line[1] = str(int(line[1]) - 256)
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '1' & x\"" + line[1]
+        if '"' in line[0]:
+            line[1] = "\" & \"01\" & x\"" + line[1]
+        else:
+            line[1] = " & \"01\" & x\"" + line[1]
     else:
         line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-        line[1] = "\" & '0' & x\"" + line[1]
+        if '"' in line[0]:
+            line[1] = "\" & \"00\" & x\"" + line[1]
+        else:
+            line[1] = " & \"00\" & x\"" + line[1]
     line = ''.join(line)
+    return line
+
+
+#Converte o valor antes do caracter ','
+#em um valor hexadecimal de 2 digitos
+def converteVirgula10bits(line):
+    idx = line.find('R')
+    reg = line[idx:idx+2]
+    num = reg_sel[reg]
+    num = bin(int(num))[2:].zfill(2)
+    txt = ' & "' + num 
+    line = line.replace(reg + ',', txt)
     return line
 
         
@@ -219,7 +274,6 @@ def trataMnemonico(line):
     line = line.replace("\n", "") #Remove o caracter de final de linha
     line = line.replace("\t", "") #Remove o caracter de tabulacao
     line = line.split(' ')
-    line[0] = mne[line[0]]
     line = "".join(line)
     return line
     
@@ -235,6 +289,8 @@ with open(inputASM, "r") as f: #Abre o arquivo ASM
     cnt = 0
     for line in lines:
         label = defineLabel(line)
+        if line.strip() == '': #Se a linha for vazia, pula
+            continue
         if label != None:
             labelPos[label] = cnt #JMP sempre pra linha dps da label
         else:
@@ -248,7 +304,9 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
     for line in lines:        
         
         #Verifica se a linha começa com alguns caracteres invalidos ('\n' ou ' ' ou '#')
-        if (line.startswith('\n') or line.startswith(' ') or line.startswith('#')):
+        if line.strip() == '':
+            continue
+        if  (line.startswith('\n') or line.startswith(' ') or line.startswith('#')):
             line = line.replace("\n", "")
             print("-- Sintaxe invalida" + ' na Linha: ' + ' --> (' + line + ')') #Print apenas para debug
         
@@ -261,33 +319,39 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
 
             if ':' in instrucaoLine:
                 continue
-
+            
             instrucaoLine = trataMnemonico(instrucaoLine) #Trata o mnemonico. Ex(JSR @14): x"9" @14
+            
+            if ',' in instrucaoLine:
+                instrucaoLine = converteVirgula10bits(instrucaoLine)
                   
             if '@' in instrucaoLine: #Se encontrar o caractere arroba '@' 
-                if noveBits == False:
+                if dezBits == False:
                     instrucaoLine = converteArroba(instrucaoLine) #converte o número após o caractere Ex(JSR @14): x"9" x"0E"
                 else:
-                    instrucaoLine = converteArroba9bits(instrucaoLine) #converte o número após o caractere Ex(JSR @14): x"9" x"0E"
+                    instrucaoLine = converteArroba10bits(instrucaoLine) #converte o número após o caractere Ex(JSR @14): x"9" x"0E"
                     
             elif '$' in instrucaoLine: #Se encontrar o caractere cifrao '$'
-                if noveBits == False:
+                if dezBits == False:
                     instrucaoLine = converteCifrao(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
                 else:
-                    instrucaoLine = converteCifrao9bits(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
+                    instrucaoLine = converteCifrao10bits(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
 
             elif '.' in instrucaoLine:
-                instrucaoLine = convertePonto9bits(instrucaoLine)
+                instrucaoLine = convertePonto10bits(instrucaoLine)
                 
             else: #Senão, se a instrução nao possuir nenhum imediato, ou seja, nao conter '@' ou '$'
                 instrucaoLine = instrucaoLine.replace("\n", "") #Remove a quebra de linha
-                if noveBits == False:
+                if dezBits == False:
                     instrucaoLine = instrucaoLine + '00' #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
                 else:
-                    instrucaoLine = instrucaoLine + "\" & " + "\'0\' & " + "x\"00" #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
-                
+                    instrucaoLine = instrucaoLine + " & " + "\"00\" & "  + "\"00\" & " + "x\"00" #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
+
+            if instrucaoLine.count('&') == 2:
+                idx = instrucaoLine.find('&')
+                instrucaoLine = instrucaoLine.replace(instrucaoLine[idx:idx+5], f"& \"00\" {instrucaoLine[idx:idx+5]}")  
             
-            line = 'tmp(' + str(cont) + ') := x"' + instrucaoLine + '";\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
+            line = 'tmp(' + str(cont) + ') := ' + instrucaoLine + '\";\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
                                                                                                        #Entrada => 1. JSR @14 #comentario1
                                                                                                        #Saída =>   1. tmp(0) := x"90E";	-- JSR @14 	#comentario1
                                         

@@ -19,21 +19,197 @@ DATA_RADIX=HEX;
 
 CONTENT BEGIN
 --endereco : dado;
-0 : 90E;	-- JSR @14		
-1 : 605;	-- JMP @5		
-2 : 709;	-- JEQ @9		
-3 : 000;	-- NOP
-4 : 000;	-- NOP
-5 : 405;	-- LDI $5		
-6 : 500;	-- STA $0		
-7 : 800;	-- CEQ @0		
-8 : 602;	-- JMP @2		
-9 : 000;	-- NOP
-10 : 404;	-- LDI $4		
-11 : 800;	-- CEQ @0		
-12 : 703;	-- JEQ @3		
-13 : 60D;	-- JMP @13		
-14 : B14;	-- OP_AND @20
-15 : 000;	-- NOP
-16 : A00;	-- RET			
+0 : LDI & 00 & 00 & 00;	-- LDI R0, $0 	
+1 : STA & 00 & 01 & 00;	-- STA R0, .LEDS
+2 : STA & 00 & 01 & 01;	-- STA R0, .LED8
+3 : STA & 00 & 01 & 02;	-- STA R0, .LED9
+4 : STA & 00 & 01 & 20;	-- STA R0, .HEX0
+5 : STA & 00 & 01 & 21;	-- STA R0, .HEX1
+6 : STA & 00 & 01 & 22;	-- STA R0, .HEX2
+7 : STA & 00 & 01 & 23;	-- STA R0, .HEX3
+8 : STA & 00 & 01 & 24;	-- STA R0, .HEX4
+9 : STA & 00 & 01 & 25;	-- STA R0, .HEX5
+10 : STA & 00 & 00 & 00;	-- STA R0, @0 	
+11 : STA & 00 & 00 & 01;	-- STA R0, @1 	
+12 : STA & 00 & 00 & 02;	-- STA R0, @2 	
+13 : STA & 00 & 00 & 03;	-- STA R0, @3 	
+14 : STA & 00 & 00 & 04;	-- STA R0, @4 	
+15 : STA & 00 & 00 & 05;	-- STA R0, @5 	
+16 : STA & 00 & 00 & 06;	-- STA R0, @6 	
+17 : STA & 00 & 00 & 0F;	-- STA R0, @15 	
+18 : LDI & 01 & 00 & 01;	-- LDI R1, $1
+19 : STA & 01 & 00 & 0D;	-- STA R1, @13 	
+20 : LDI & 10 & 00 & 0A;	-- LDI R2, $10
+21 : STA & 10 & 00 & 07;	-- STA R2, @7 	
+22 : STA & 10 & 00 & 08;	-- STA R2, @8 	
+23 : STA & 10 & 00 & 09;	-- STA R2, @9 	
+24 : STA & 10 & 00 & 0A;	-- STA R2, @10 	
+25 : STA & 10 & 00 & 0B;	-- STA R2, @11 	
+26 : STA & 10 & 00 & 0C;	-- STA R2, @12 	
+27 : STA & 10 & 00 & 0E;	-- STA R2, @14 	
+28 : STA & 10 & 01 & FF;	-- STA R2, .CK0 	
+29 : STA & 10 & 01 & FE;	-- STA R2, .CK1 	
+30 : LDI & 00 & 00 & 00;	-- LDI R0, $0 	
+31 : CEQ & 00 & 01 & 60;	-- CEQ R0, .K0  	
+32 : JEQ & 00 & 00 & 22;	-- JEQ .DEPOIS_DO_K0 	
+33 : JSR & 00 & 00 & 52;	-- JSR .INC 	
+34 : JSR & 00 & 00 & 45;	-- JSR .ATUALIZA_DISPLAY 	
+35 : LDI & 01 & 00 & 00;	-- LDI R1, $0 	
+36 : CEQ & 01 & 01 & 61;	-- CEQ R1, .K1 	
+37 : JEQ & 00 & 00 & 27;	-- JEQ .DEPOIS_DO_K1
+38 : JSR & 00 & 00 & 8A;	-- JSR .ATUALIZA_LIMITE 	
+39 : JSR & 00 & 00 & 29;	-- JSR .LIMITE 	
+40 : JMP & 00 & 00 & 1E;	-- JMP .MAIN 	
+41 : LDA & 00 & 00 & 00;	-- LDA R0, @0 	
+42 : CEQ & 00 & 00 & 07;	-- CEQ R0, @7 	
+43 : JEQ & 00 & 00 & 2D;	-- JEQ .CONTINUA_UNIDADE 	
+44 : RET & 00 & 00 & 00;	-- RET 
+45 : LDA & 01 & 00 & 01;	-- LDA R1, @1 	
+46 : CEQ & 01 & 00 & 08;	-- CEQ R1, @8 	
+47 : JEQ & 00 & 00 & 31;	-- JEQ .CONTINUA_DEZENA 	
+48 : RET & 00 & 00 & 00;	-- RET
+49 : LDA & 10 & 00 & 02;	-- LDA R2, @2 	
+50 : CEQ & 10 & 00 & 09;	-- CEQ R2, @9 	
+51 : JEQ & 00 & 00 & 35;	-- JEQ .CONTINUA_CENTENA 	
+52 : RET & 00 & 00 & 00;	-- RET
+53 : LDA & 11 & 00 & 03;	-- LDA R3, @3 	
+54 : CEQ & 11 & 00 & 0A;	-- CEQ R3, @10 	
+55 : JEQ & 00 & 00 & 39;	-- JEQ .CONTINUA_U_MILHAR 	
+56 : RET & 00 & 00 & 00;	-- RET
+57 : LDA & 00 & 00 & 04;	-- LDA R0, @4 	
+58 : CEQ & 00 & 00 & 0B;	-- CEQ R0, @11 	
+59 : JEQ & 00 & 00 & 3D;	-- JEQ .CONTINUA_D_MILHAR 	
+60 : RET & 00 & 00 & 00;	-- RET
+61 : LDA & 01 & 00 & 05;	-- LDA R1, @5 	
+62 : CEQ & 01 & 00 & 0C;	-- CEQ R1, @12 	
+63 : JEQ & 00 & 00 & 41;	-- JEQ .CONTINUA_C_MILHAR 	
+64 : RET & 00 & 00 & 00;	-- RET
+65 : LDI & 10 & 00 & 01;	-- LDI R2, $1 	
+66 : STA & 10 & 00 & 06;	-- STA R2, @6 	
+67 : STA & 10 & 01 & 01;	-- STA R2, .LED8 	
+68 : RET & 00 & 00 & 00;	-- RET 	
+69 : LDA & 00 & 00 & 00;	-- LDA R0, @0 	
+70 : STA & 00 & 01 & 20;	-- STA R0, .HEX0 	
+71 : LDA & 01 & 00 & 01;	-- LDA R1, @1 	
+72 : STA & 01 & 01 & 21;	-- STA R1, .HEX1 	
+73 : LDA & 10 & 00 & 02;	-- LDA R2, @2 	
+74 : STA & 10 & 01 & 22;	-- STA R2, .HEX2 	
+75 : LDA & 11 & 00 & 03;	-- LDA R3, @3 	
+76 : STA & 11 & 01 & 23;	-- STA R3, .HEX3 	
+77 : LDA & 00 & 00 & 04;	-- LDA R0, @4 	
+78 : STA & 00 & 01 & 24;	-- STA R0, .HEX4 	
+79 : LDA & 01 & 00 & 05;	-- LDA R1, @5 	
+80 : STA & 01 & 01 & 25;	-- STA R1, .HEX5 	
+81 : RET & 00 & 00 & 00;	-- RET
+82 : STA & 00 & 01 & FF;	-- STA R0, .CK0 	
+83 : LDI & 00 & 00 & 00;	-- LDI R0, $0 	
+84 : CEQ & 00 & 00 & 06;	-- CEQ R0, @6 	
+85 : JEQ & 00 & 00 & 57;	-- JEQ .FAZ_CONTAGEM 
+86 : RET & 00 & 00 & 00;	-- RET
+87 : LDA & 01 & 00 & 00;	-- LDA R1, @0 	
+88 : SOMA & 01 & 00 & 0D;	-- SOMA R1, @13 	
+89 : STA & 01 & 00 & 00;	-- STA R1, @0 	
+90 : CEQ & 01 & 00 & 0E;	-- CEQ R1, @14 	
+91 : JEQ & 00 & 00 & 5D;	-- JEQ .CARRY_UN
+92 : RET & 00 & 00 & 00;	-- RET
+93 : LDI & 01 & 00 & 00;	-- LDI R1, $0 	
+94 : STA & 01 & 00 & 00;	-- STA R1, @0 	
+95 : LDA & 01 & 00 & 01;	-- LDA R1, @1 	
+96 : SOMA & 01 & 00 & 0D;	-- SOMA R1, @13 	
+97 : STA & 01 & 00 & 01;	-- STA R1, @1 	
+98 : CEQ & 01 & 00 & 0E;	-- CEQ R1, @14 	
+99 : JEQ & 00 & 00 & 65;	-- JEQ .CARRY_D
+100 : RET & 00 & 00 & 00;	-- RET
+101 : LDI & 10 & 00 & 00;	-- LDI R2, $0 	
+102 : STA & 10 & 00 & 01;	-- STA R2, @1 	
+103 : LDA & 10 & 00 & 02;	-- LDA R2, @2 	
+104 : SOMA & 10 & 00 & 0D;	-- SOMA R2, @13 	
+105 : STA & 10 & 00 & 02;	-- STA R2, @2 	
+106 : CEQ & 10 & 00 & 0E;	-- CEQ R2, @14 	
+107 : JEQ & 00 & 00 & 6D;	-- JEQ .CARRY_C
+108 : RET & 00 & 00 & 00;	-- RET
+109 : LDI & 11 & 00 & 00;	-- LDI R3, $0 	
+110 : STA & 11 & 00 & 02;	-- STA R3, @2 	
+111 : LDA & 11 & 00 & 03;	-- LDA R3, @3 	
+112 : SOMA & 11 & 00 & 0D;	-- SOMA R3, @13 	
+113 : STA & 11 & 00 & 03;	-- STA R3, @3 	
+114 : CEQ & 11 & 00 & 0E;	-- CEQ R3, @14 	
+115 : JEQ & 00 & 00 & 75;	-- JEQ .CARRY_U_MILHAR
+116 : RET & 00 & 00 & 00;	-- RET
+117 : LDI & 00 & 00 & 00;	-- LDI R0, $0 	
+118 : STA & 00 & 00 & 03;	-- STA R0, @3 	
+119 : LDA & 00 & 00 & 04;	-- LDA R0, @4 	
+120 : SOMA & 00 & 00 & 0D;	-- SOMA R0, @13 	
+121 : STA & 00 & 00 & 04;	-- STA R0, @4 	
+122 : CEQ & 00 & 00 & 0E;	-- CEQ R0, @14 	
+123 : JEQ & 00 & 00 & 7D;	-- JEQ .CARRY_D_MILHAR
+124 : RET & 00 & 00 & 00;	-- RET
+125 : LDI & 01 & 00 & 00;	-- LDI R1, $0 	
+126 : STA & 01 & 00 & 04;	-- STA R1, @4 	
+127 : LDA & 01 & 00 & 05;	-- LDA R1, @5 	
+128 : SOMA & 01 & 00 & 0D;	-- SOMA R1, @13 	
+129 : STA & 01 & 00 & 05;	-- STA R1, @5 	
+130 : CEQ & 01 & 00 & 0E;	-- CEQ R1, @14 	
+131 : JEQ & 00 & 00 & 85;	-- JEQ .CARRY_C_MILHAR
+132 : RET & 00 & 00 & 00;	-- RET
+133 : LDI & 10 & 00 & 00;	-- LDI R2, $0 	
+134 : STA & 10 & 00 & 05;	-- STA R2, @5 	
+135 : LDI & 10 & 00 & 01;	-- LDI R2, $1 	
+136 : STA & 10 & 01 & 02;	-- STA R2, .LED9 	
+137 : RET & 00 & 00 & 00;	-- RET
+138 : LDI & 00 & 00 & 01;	-- LDI R0, $1 	
+139 : STA & 00 & 01 & 00;	-- STA R0, .LEDS 	
+140 : LDI & 00 & 00 & 00;	-- LDI R0, $0 	
+141 : STA & 00 & 01 & 01;	-- STA R0, .LED8 	
+142 : STA & 00 & 00 & 06;	-- STA R0, @6 	
+143 : STA & 00 & 01 & FE;	-- STA R0, .CK1 	
+144 : LDA & 01 & 01 & 61;	-- LDA R1, .K1 	
+145 : CEQ & 01 & 00 & 0F;	-- CEQ R1, @15 	
+146 : JEQ & 00 & 00 & 90;	-- JEQ .ESPERA_UN
+147 : LDA & 01 & 01 & 40;	-- LDA R1, .SWS 	
+148 : STA & 01 & 00 & 07;	-- STA R1, @7 	
+149 : STA & 01 & 01 & FE;	-- STA R1, .CK1 	
+150 : LDI & 01 & 00 & 02;	-- LDI R1, $2 	
+151 : STA & 01 & 01 & 00;	-- STA R1, .LEDS 	
+152 : LDA & 10 & 01 & 61;	-- LDA R2, .K1 	
+153 : CEQ & 10 & 00 & 0F;	-- CEQ R2, @15 	
+154 : JEQ & 00 & 00 & 98;	-- JEQ .ESPERA_D
+155 : LDA & 10 & 01 & 40;	-- LDA R2, .SWS 	
+156 : STA & 10 & 00 & 08;	-- STA R2, @8 	
+157 : STA & 10 & 01 & FE;	-- STA R2, .CK1 	
+158 : LDI & 10 & 00 & 04;	-- LDI R2, $4 	
+159 : STA & 10 & 01 & 00;	-- STA R2, .LEDS 	
+160 : LDA & 11 & 01 & 61;	-- LDA R3, .K1 	
+161 : CEQ & 11 & 00 & 0F;	-- CEQ R3, @15 	
+162 : JEQ & 00 & 00 & A0;	-- JEQ .ESPERA_C
+163 : LDA & 11 & 01 & 40;	-- LDA R3, .SWS 	
+164 : STA & 11 & 00 & 09;	-- STA R3, @9 	
+165 : STA & 11 & 01 & FE;	-- STA R3, .CK1 	
+166 : LDI & 11 & 00 & 08;	-- LDI R3, $8 	
+167 : STA & 11 & 01 & 00;	-- STA R3, .LEDS 	
+168 : LDA & 00 & 01 & 61;	-- LDA R0, .K1 	
+169 : CEQ & 00 & 00 & 0F;	-- CEQ R0, @15 	
+170 : JEQ & 00 & 00 & A8;	-- JEQ .ESPERA_U_MILHAR
+171 : LDA & 00 & 01 & 40;	-- LDA R0, .SWS 	
+172 : STA & 00 & 00 & 0A;	-- STA R0, @10 	
+173 : STA & 00 & 01 & FE;	-- STA R0, .CK1 	
+174 : LDI & 00 & 00 & 10;	-- LDI R0, $16 	
+175 : STA & 00 & 01 & 00;	-- STA R0, .LEDS 	
+176 : LDA & 01 & 01 & 61;	-- LDA R1, .K1 	
+177 : CEQ & 01 & 00 & 0F;	-- CEQ R1, @15 	
+178 : JEQ & 00 & 00 & B0;	-- JEQ .ESPERA_D_MILHAR
+179 : LDA & 01 & 01 & 40;	-- LDA R1, .SWS 	
+180 : STA & 01 & 00 & 0B;	-- STA R1, @11 	
+181 : STA & 01 & 01 & FE;	-- STA R1, .CK1 	
+182 : LDI & 01 & 00 & 20;	-- LDI R1, $32 	
+183 : STA & 01 & 01 & 00;	-- STA R1, .LEDS 	
+184 : LDA & 10 & 01 & 61;	-- LDA R2, .K1 	
+185 : CEQ & 10 & 00 & 0F;	-- CEQ R2, @15 	
+186 : JEQ & 00 & 00 & B8;	-- JEQ .ESPERA_C_MILHAR
+187 : LDA & 10 & 01 & 40;	-- LDA R2, .SWS 	
+188 : STA & 10 & 00 & 0C;	-- STA R2, @12 	
+189 : STA & 10 & 01 & FE;	-- STA R2, .CK1 	
+190 : LDI & 10 & 00 & 00;	-- LDI R2, $0 	
+191 : STA & 10 & 01 & 00;	-- STA R2, .LEDS 	
+192 : RET & 00 & 00 & 00;	-- RET
 END;
