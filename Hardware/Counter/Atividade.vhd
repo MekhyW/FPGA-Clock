@@ -17,9 +17,7 @@ entity Atividade is
 	 HEX2: OUT std_logic_vector(6 downto 0);
 	 HEX3: OUT std_logic_vector(6 downto 0);
 	 HEX4: OUT std_logic_vector(6 downto 0);
-	 HEX5: OUT std_logic_vector(6 downto 0);
-	 PC_OUT: OUT std_logic_vector(8 downto 0);
-	 MEM: OUT std_logic_vector(8 downto 0)
+	 HEX5: OUT std_logic_vector(6 downto 0)
   );
 end entity;
 
@@ -30,12 +28,12 @@ architecture arquitetura of Atividade is
 signal control_in : std_logic_vector(1 downto 0);
 signal control_out : std_logic_vector(1 downto 0);
 
-signal rom_addr : std_logic_vector(8 downto 0);
-signal instruction : std_logic_vector(12 downto 0);
+signal rom_addr : std_logic_vector(9 downto 0);
+signal instruction : std_logic_vector(16 downto 0);
 
 signal ramToCpu : std_logic_vector(7 downto 0);
 signal cpuToRam : std_logic_vector(7 downto 0);
-signal data_addr : std_logic_vector(8 downto 0);
+signal data_addr : std_logic_vector(9 downto 0);
 
 signal blockDec : std_logic_vector(7 downto 0);
 signal addrDec : std_logic_vector(7 downto 0);
@@ -89,7 +87,7 @@ proc : work.cpu port map(control_in => control_in, control_out => control_out, r
 								instruction_in => instruction, data_in => ramToCpu, data_out => cpuToRam, data_address => data_addr);
 
 
-ROM1 : entity work.memoriaROM   generic map (dataWidth => 13, addrWidth => 9)
+ROM1 : entity work.memoriaROM   generic map (dataWidth => 17, addrWidth => 10)
           port map (Endereco => rom_addr, Dado => instruction);
 
 ram: entity work.memoriaRAM generic map (dataWidth => 8, addrWidth => 6)
@@ -196,9 +194,7 @@ buffer_fpga :  entity work.buffer_3_state
         port map(entrada => (not FPGA_RESET_N), habilita =>  Habilita_reset, saida => ramToCpu(0));
 
 		  
-control_in(0) <= not(FPGA_RESET_N);
-PC_OUT <= rom_addr;
-MEM <= data_addr;	
+control_in(0) <= not(FPGA_RESET_N);	
 
 Habilita_led <= (addrDec(0) and control_out(0) and blockDec(4) and (not(data_addr(5))));
 Habilita_wr <= (addrDec(1) and control_out(0) and blockDec(4) and (not(data_addr(5))));
