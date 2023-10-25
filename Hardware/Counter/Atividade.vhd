@@ -50,14 +50,17 @@ signal auxK0 : std_logic;
 signal auxK1 : std_logic;
 signal k0_out : std_logic_vector(0 downto 0);
 signal k1_out : std_logic_vector(0 downto 0);
+signal time_out : std_logic;
 signal k0_reset : std_logic;
 signal k1_reset : std_logic;
+signal time_reset : std_logic;
 
 signal Habilita_key0 : std_logic;
 signal Habilita_key1 : std_logic;
 signal Habilita_key2 : std_logic;
 signal Habilita_key3 : std_logic;
 signal Habilita_reset : std_logic;
+signal Habilita_time : std_logic;
 
 signal hex0ToDec : std_logic_vector(3 downto 0);
 signal hex1ToDec : std_logic_vector(3 downto 0);
@@ -81,6 +84,12 @@ control_in(1) <= CLOCK_50;
 
 detectorSub0: work.edgeDetector(bordaSubida) port map (clk => CLOCK_50, entrada => (not KEY(0)), saida => auxK0);
 detectorSub1: work.edgeDetector(bordaSubida) port map (clk => CLOCK_50, entrada => (not KEY(1)), saida => auxK1);
+
+
+interfaceBaseTempo : entity work.divisorGenerico_e_Interface
+              port map (clk => CLOCK_50,
+              limpaLeitura => time_reset,
+              leituraReg => time_out);
 
 
 proc : work.cpu port map(control_in => control_in, control_out => control_out, rom_address => rom_addr,
@@ -183,6 +192,9 @@ buffer_key0 :  entity work.buffer_3_state
 
 buffer_key1 :  entity work.buffer_3_state
         port map(entrada => k1_out(0), habilita =>  Habilita_key1, saida => ramToCpu(0));
+		  
+buffer_time :  entity work.buffer_3_state
+        port map(entrada => time_out, habilita =>  Habilita_time, saida => ramToCpu(0));
 
 buffer_key2 :  entity work.buffer_3_state
         port map(entrada => (not KEY(2)), habilita =>  Habilita_key2, saida => ramToCpu(0));
@@ -219,11 +231,16 @@ Habilita_key1 <= (addrDec(1) and control_out(1) and blockDec(5) and data_addr(5)
 Habilita_key2 <= (addrDec(2) and control_out(1) and blockDec(5) and data_addr(5));
 Habilita_key3 <= (addrDec(3) and control_out(1) and blockDec(5) and data_addr(5));
 Habilita_reset <= (addrDec(4) and control_out(1) and blockDec(5) and data_addr(5));
+Habilita_time <= (addrDec(5) and control_out(1) and blockDec(5) and data_addr(5));
+
 
 k0_reset <= (control_out(0) and data_addr(0) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
 data_addr(6) and data_addr(7) and data_addr(8));
 
 k1_reset <= (control_out(0) and (not(data_addr(0))) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
+data_addr(6) and data_addr(7) and data_addr(8));
+
+time_reset <= (control_out(0) and (data_addr(0)) and (not(data_addr(1))) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
 data_addr(6) and data_addr(7) and data_addr(8)); 
 
 end architecture;
