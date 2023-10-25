@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 entity divisorGenerico_e_Interface is
    port(clk      :   in std_logic;
       limpaLeitura : in std_logic;
+		base_div : in std_logic_vector(7 downto 0);
       leituraReg :   out std_logic
    );
 end entity;
@@ -16,7 +17,7 @@ begin
 
 baseTempo: entity work.divisorGenerico
            generic map (divisor => 25000000)   -- divide por 10.
-           port map (clk => clk, saida_clk => saidaclk_reg1seg);
+           port map (clk => clk, saida_clk => saidaclk_reg1seg, div_base => base_div);
 
 registraUmSegundo: entity work.flipflopGenerico
    port map (DIN => '1', DOUT => leituraReg,

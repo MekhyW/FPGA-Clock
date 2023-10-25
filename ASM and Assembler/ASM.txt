@@ -18,6 +18,7 @@ STA R0, @6 #flag inibe contagem
 STA R0, @15 #cte 0 para saber se botao esta solto
 LDI R1, $1
 STA R1, @13 #cte 1 para incrementar
+STA R1, .TIME_DIV #base de tempo por padrao 1 seg
 LDI R2, $10
 STA R2, @7 #limite unidade
 STA R2, @8 #limite dezena
@@ -49,6 +50,11 @@ CEQ R1, .K0 #ve se k0 esta pressionado
 JEQ .DEPOIS_DO_K0
 JSR .CONFIGURA_TEMPO #configura horario atual
 DEPOIS_DO_K0:
+LDI R2, $0 #carrega zero
+CEQ R2, .K1 #ve se k0 esta pressionado
+JEQ .DEPOIS_DO_K1
+JSR .MUDA_BASE #muda base de tempo
+DEPOIS_DO_K1:
 JMP .MAIN #volta para o inicio do laco
 
 
@@ -241,5 +247,19 @@ LDI R0, $0 #carrega zero
 STA R0, @4 #zera unidade hora
 STA R0, @5 #zera dezena hora
 RET
+
+
+MUDA_BASE:
+STA R1, .CK1 #limpa k1
+ESPERA:
+LDA R2, .K1 #carrega k1
+CEQ R2, @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA
+LDA R1, .SWS #carrega chaves
+STA R1, .TIME_DIV #armazena o numero de vezes mais rapido que a base de tempo alternativa eh
+STA R1, .CK1 #limpa k1
+LDI R1, $100 #carrega 100
+RET
+
 
 
