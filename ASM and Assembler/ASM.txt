@@ -17,7 +17,6 @@ STA R0, @5 #dezena de hora
 STA R0, @6 #flag inibe contagem
 STA R0, @15 #cte 0 para saber se botao esta solto
 LDI R1, $1
-STA R1, @13 #cte 1 para incrementar
 STA R1, .TIME_DIV #base de tempo por padrao 1 seg
 LDI R2, $10
 STA R2, @14 #cte 10 para verificar estouro
@@ -53,17 +52,17 @@ JMP .MAIN #volta para o inicio do laco
 
 
 ATUALIZA_DISPLAY:
-LDA R0, @0 #carrega unidade
+LDA R0, @0 #carrega unidade de segundo
 STA R0, .HEX0 #armazena em hex0
-LDA R1, @1 #carrega dezena
+LDA R1, @1 #carrega dezena de segundo
 STA R1, .HEX1 #armazena em hex1
-LDA R2, @2 #carrega centena
+LDA R2, @2 #carrega unidade de minuto
 STA R2, .HEX2 #armazena em hex2
-LDA R3, @3 #carrega unidade de milhar
+LDA R3, @3 #carrega dezena de minuto
 STA R3, .HEX3 #armazena em hex3
-LDA R0, @4 #carrega dezena de milhar
+LDA R0, @4 #carrega unidade de hora
 STA R0, .HEX4 #armazena em hex4
-LDA R1, @5 #carrega centena de milhar
+LDA R1, @5 #carrega dezena de hora
 STA R1, .HEX5 #armazena em hex5
 RET
 
@@ -76,7 +75,7 @@ JEQ .FAZ_CONTAGEM
 RET
 FAZ_CONTAGEM:
 LDA R1, @0 #carrega unidade
-SOMA R1, @13 #soma com um
+SOMAI R1, $1 #soma com um
 STA R1, @0 #armazena unidade
 JSR .VERIFICA_ESTOURO #verifica estouro
 RET
@@ -91,7 +90,7 @@ CARRY_UN_S:
 LDI R1, $0 #carrega zero
 STA R1, @0 #zera unidade seg
 LDA R1, @1 #carrega dezena seg
-SOMA R1, @13 #incrementa
+SOMAI R1, $1 #incrementa
 STA R1, @1 #armazena dezena seg
 CEQ R1, @14 #compara com 10 para verificar estouro
 JEQ .CARRY_D_S
@@ -101,7 +100,7 @@ LDI R2, $0 #carrega zero
 STA R2, @1 #zera dezena seg
 VERIFICA_ESTOURO_MINUTO:
 LDA R2, @2 #carrega unidade min
-SOMA R2, @13 #incrementa
+SOMAI R2, $1 #incrementa
 STA R2, @2 #armazena unidade min
 CEQ R2, @14 #compara com 10 para verificar estouro
 JEQ .CARRY_UN_M
@@ -110,7 +109,7 @@ CARRY_UN_M:
 LDI R3, $0 #carrega zero
 STA R3, @2 #zera unidade min
 LDA R3, @3 #carrega dezena min
-SOMA R3, @13 #incrementa
+SOMAI R3, $1 #incrementa
 STA R3, @3 #armazena dezena min
 CEQ R3, @14 #compara com 10 para verificar estouro
 JEQ .CARRY_D_M
@@ -120,7 +119,7 @@ LDI R0, $0 #carrega zero
 STA R0, @3 #zera dezena min
 VERIFICA_ESTOURO_HORA:
 LDA R0, @4 #carrega unidade hora
-SOMA R0, @13 #incrementa
+SOMAI R0, $1 #incrementa
 STA R0, @4 #armazena unidade hora
 CEQ R0, @14 #compara com 10 para verificar estouro
 JEQ .CARRY_UN_H
@@ -129,7 +128,7 @@ CARRY_UN_H:
 LDI R1, $0 #carrega zero
 STA R1, @4 #zera unidade hora
 LDA R1, @5 #carrega dezena hora
-SOMA R1, @13 #incrementa
+SOMAI R1, $1 #incrementa
 STA R1, @5 #armazena dezena hora
 CEQ R1, @14 #compara com 10 para verificar estouro
 JEQ .CARRY_D_H
@@ -143,6 +142,8 @@ RET
 
 
 CONFIGURA_TEMPO:
+STA R0, .CK0 #limpa K0
+STA R0, .CTIME #limpa tempo
 LDI R0, $1 #carrega um
 STA R0, .LEDS #ativa led0 pra indicar unidade segundo
 LDI R0, $0 #carrega zero

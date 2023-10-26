@@ -21,11 +21,13 @@ architecture comportamento of decoderInstru is
   constant JSR : std_logic_vector(4 downto 0) := "01001";
   constant RET : std_logic_vector(4 downto 0) := "01010";
   constant OP_AND : std_logic_vector(4 downto 0) := "01011";
+  constant SOMAI : std_logic_vector(4 downto 0) := "01100";
 
   begin
 saida <= "0000000000000" when opcode = NOP else
          "0000001011010" when opcode = LDA else
          "0000001000010" when opcode = SOMA else
+			"0000011000000" when opcode = SOMAI else
          "0000001001010" when opcode = SUB else
          "0000011011000" when opcode = LDI else
 			"0000000011001" when opcode = STA else
