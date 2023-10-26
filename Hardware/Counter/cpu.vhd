@@ -26,6 +26,13 @@ architecture arquitetura of cpu is
   signal Endereco : std_logic_vector (9 downto 0);
   signal proxPC : std_logic_vector (9 downto 0);
   
+  signal SP_OUT : std_logic_vector(2 downto 0);
+  signal Saida_ULA_SP : std_logic_vector(2 downto 0);
+  signal MUX_SP_OUT : std_logic_vector(2 downto 0);
+  signal stack_RAM_OUT : std_logic_vector(9 downto 0);
+  signal Operacao_SP : std_logic;
+  signal Habilita_SP : std_logic;  
+  
   alias CLK : std_logic is control_in(1);
   alias RESET : std_logic is control_in(0);
   
@@ -78,13 +85,34 @@ incrementaPC :  entity work.somaConstante  generic map (larguraDados => 10, cons
 ULA1 : entity work.ULA  generic map(larguraDados => 8)
           port map (entradaA => REG1_ULA_A, entradaB => MUX_REG1, saida => Saida_ULA, seletor => Operacao_ULA, flagZero => flagIgual_in(0));
 
+			 
+ULA_SP : entity work.ULASomaSub  generic map(larguraDados => 3)
+          port map (entradaA => SP_OUT, entradaB => "001", saida => Saida_ULA_SP, seletor => Operacao_SP);
+
+			 
+SP : entity work.registradorGenerico   generic map (larguraDados => 3)
+          port map (DIN => Saida_ULA_SP, DOUT => SP_OUT, ENABLE => Habilita_SP, CLK => CLK, RST => RESET);
+			 
+
+MUXSP :  entity work.muxGenerico2x1  generic map (larguraDados => 3)
+        port map( entradaA_MUX => Saida_ULA_SP,
+                 entradaB_MUX =>  SP_OUT,
+                 seletor_MUX => Operacao_SP,
+                 saida_MUX => MUX_SP_OUT);
+					  
+					  
+ram_stack: entity work.memoriaRAM generic map (dataWidth => 10, addrWidth => 3)
+		port map (addr => MUX_SP_OUT, we => JSR, re => RET, habilita => Habilita_SP,
+		CLK => CLK, dado_in => proxPC, dado_out => stack_RAM_OUT);
+			 
+
 dec : entity work.decoderInstru 
 			port map (opcode => opCode, saida => Sinais_Controle);
 
 		
 mux2: entity work.muxGenerico4x1 generic map(larguraDados => 10) port map( entradaA_MUX => proxPC,
                  entradaB_MUX =>  endereco_bus,
-					  entradaC_MUX => endret,
+					  entradaC_MUX => stack_RAM_OUT,
 					  entradaD_MUX => "0000000000",
                  seletor_MUX => selMux_pc,
                  saida_MUX => MUX_PC);
@@ -92,9 +120,6 @@ mux2: entity work.muxGenerico4x1 generic map(larguraDados => 10) port map( entra
 flagIgual : entity work.registradorGenerico   generic map (larguraDados => 1)
           port map (DIN => flagIgual_in, DOUT => flagIgual_uc, ENABLE => habilitaFlag_igual, CLK => CLK, RST => '0');
 			 
-endretu : entity work.registradorGenerico   generic map (larguraDados => 10)
-          port map (DIN => proxPC, DOUT => endret, ENABLE => habilita_ret , CLK => CLK, RST => '0');
-		
 
 data_address <= endereco_bus;
 
@@ -112,6 +137,14 @@ Operacao_ULA <= Sinais_Controle(5 downto 3);
 habilitaFlag_igual <= Sinais_Controle(2);
 control_out(1) <= Sinais_Controle(1);
 control_out(0) <= Sinais_Controle(0);
+
+
+Operacao_SP <= '1' when (RET = '0' and JSR = '1') else
+					'0';
+				
+Habilita_SP	<= '1' when (RET = '1' or JSR = '1') else
+					'0';
+
 
 selMux_pc <= "10" when (RET = '1') else
 				 "01" when (JMP = '1' or JSR = '1' or (JEQ = '1' and flagIgual_uc(0) = '1')) else

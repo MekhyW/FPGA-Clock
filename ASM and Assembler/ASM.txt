@@ -8,24 +8,18 @@ STA R0, .HEX2
 STA R0, .HEX3
 STA R0, .HEX4
 STA R0, .HEX5
-STA R0, @0 #unidade
-STA R0, @1 #dezena
-STA R0, @2 #centena
-STA R0, @3 #unidade de milhar
-STA R0, @4 #dezena de milhar
-STA R0, @5 #centena de milhar
+STA R0, @0 #unidade de segundo
+STA R0, @1 #dezena de segundo
+STA R0, @2 #unidade de minuto
+STA R0, @3 #dezena de minuto
+STA R0, @4 #unidade de hora
+STA R0, @5 #dezena de hora
 STA R0, @6 #flag inibe contagem
 STA R0, @15 #cte 0 para saber se botao esta solto
 LDI R1, $1
 STA R1, @13 #cte 1 para incrementar
 STA R1, .TIME_DIV #base de tempo por padrao 1 seg
 LDI R2, $10
-STA R2, @7 #limite unidade
-STA R2, @8 #limite dezena
-STA R2, @9 #limite centena
-STA R2, @10 #limite unidade de milhar
-STA R2, @11 #limite dezena de milhar
-STA R2, @12 #limite centena de milhar
 STA R2, @14 #cte 10 para verificar estouro
 STA R2, .CK0 #limpa k0
 STA R2, .CK1 #limpa k1
@@ -84,59 +78,67 @@ FAZ_CONTAGEM:
 LDA R1, @0 #carrega unidade
 SOMA R1, @13 #soma com um
 STA R1, @0 #armazena unidade
-CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_UN
+JSR .VERIFICA_ESTOURO #verifica estouro
 RET
-CARRY_UN:
+
+
+VERIFICA_ESTOURO:
+LDA R1, @0 #carrega unidade
+CEQ R1, @14 #compara com 10 para verificar estouro
+JEQ .CARRY_UN_S
+RET
+CARRY_UN_S:
 LDI R1, $0 #carrega zero
-STA R1, @0 #zera unidade
-LDA R1, @1 #carrega dezena
+STA R1, @0 #zera unidade seg
+LDA R1, @1 #carrega dezena seg
 SOMA R1, @13 #incrementa
-STA R1, @1 #armazena dezena
+STA R1, @1 #armazena dezena seg
 CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_D
+JEQ .CARRY_D_S
 RET
-CARRY_D:
+CARRY_D_S:
 LDI R2, $0 #carrega zero
-STA R2, @1 #zera dezena
-LDA R2, @2 #carrega centena
+STA R2, @1 #zera dezena seg
+VERIFICA_ESTOURO_MINUTO:
+LDA R2, @2 #carrega unidade min
 SOMA R2, @13 #incrementa
-STA R2, @2 #armazena centena
+STA R2, @2 #armazena unidade min
 CEQ R2, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_C
+JEQ .CARRY_UN_M
 RET
-CARRY_C:
+CARRY_UN_M:
 LDI R3, $0 #carrega zero
-STA R3, @2 #zera centena
-LDA R3, @3 #carrega unidade de milhar
+STA R3, @2 #zera unidade min
+LDA R3, @3 #carrega dezena min
 SOMA R3, @13 #incrementa
-STA R3, @3 #armazena unidade de milhar
+STA R3, @3 #armazena dezena min
 CEQ R3, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_U_MILHAR
+JEQ .CARRY_D_M
 RET
-CARRY_U_MILHAR:
+CARRY_D_M:
 LDI R0, $0 #carrega zero
-STA R0, @3 #zera unidade de milhar
-LDA R0, @4 #carrega dezena de milhar
+STA R0, @3 #zera dezena min
+VERIFICA_ESTOURO_HORA:
+LDA R0, @4 #carrega unidade hora
 SOMA R0, @13 #incrementa
-STA R0, @4 #armazena dezena de milhar
+STA R0, @4 #armazena unidade hora
 CEQ R0, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_D_MILHAR
+JEQ .CARRY_UN_H
 RET
-CARRY_D_MILHAR:
+CARRY_UN_H:
 LDI R1, $0 #carrega zero
-STA R1, @4 #zera dezena de milhar
-LDA R1, @5 #carrega centena de milhar
+STA R1, @4 #zera unidade hora
+LDA R1, @5 #carrega dezena hora
 SOMA R1, @13 #incrementa
-STA R1, @5 #armazena centena de milhar
+STA R1, @5 #armazena dezena hora
 CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_C_MILHAR
+JEQ .CARRY_D_H
 RET
-CARRY_C_MILHAR:
+CARRY_D_H:
 LDI R2, $0 #carrega zero
-STA R2, @5 #zera centena de milhar
+STA R2, @5 #zera dezena hora
 LDI R2, $1 #carrega um
-STA R2, .LED9 #acende led de estouro
+STA R2, .LED9 #acende led de erro
 RET
 
 
@@ -216,9 +218,8 @@ MINUTO:
 LDI R0, $0 #carrega zero 
 STA R0, @0 #zera unidade segundo
 STA R0, @1 #zera dezena segundo
-LDA R0, @2 #carrega unidade de minuto
-SOMA R0, @13 #incrementa unidade de minuto
-STA R0, @2 #salva resultado da soma
+JSR .VERIFICA_ESTOURO_MINUTO #soma 1 no minuto e confere estouro
+LDA R0, @2 #carrega unidade minuto
 CEQ R0, @15 #compara com 0
 JEQ .DEPOIS_0_MIN #desvia se unidade for 0 min ou retorna
 RET 
@@ -231,9 +232,8 @@ HORA:
 LDI R0, $0 #carrega zero 
 STA R0, @2 #zera unidade min
 STA R0, @3 #zera dezena min
+JSR .VERIFICA_ESTOURO_HORA #soma 1 na hora e confere estouro
 LDA R0, @4 #carrega unidade de hora
-SOMA R0, @13 #incrementa unidade de hora
-STA R0, @4 #salva resultado da soma
 CEQ R0, @18 #compara com 4
 JEQ .DEPOIS_4_HOR #desvia se unidade for 4 horas ou retorna
 RET 
