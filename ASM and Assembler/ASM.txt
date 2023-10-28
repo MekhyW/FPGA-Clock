@@ -29,6 +29,8 @@ LDI R3, $2
 STA R3, @17 #cte 2 para verificar 24
 LDI R3, $4
 STA R3, @18 #cte 6 para verificar 24
+LDI R3, $3
+STA R3, @19 #cte 3 para verificar menor ou igual a 2
 
 MAIN:
 LDI R0, $0 #carrega zero
@@ -143,11 +145,8 @@ RET
 
 CONFIGURA_TEMPO:
 STA R0, .CK0 #limpa K0
-STA R0, .CTIME #limpa tempo
 LDI R0, $1 #carrega um
 STA R0, .LEDS #ativa led0 pra indicar unidade segundo
-LDI R0, $0 #carrega zero
-STA R0, .CK0 #limpa k0
 ESPERA_UN_S:
 LDA R1, .K0 #carrega k0
 CEQ R1, @15 #compara com zero para saber se esta pressionado
@@ -202,8 +201,49 @@ STA R2, @5 #armazena em dezena hora
 STA R2, .CK0 #limpa k0
 LDI R2, $0 #carrega 0
 STA R2, .LEDS #desativa leds
+JSR .VERIFICA_CONSISTENCIA
+STA R0, .CTIME #limpa tempo
 RET
 
+
+VERIFICA_CONSISTENCIA:
+LDA R0, @0 #carrega unidade de segundo
+CLT R0, @14 #verifica se menor 10
+JLT .PASSA_UN_S
+LDI R0, $9 #carrega 9
+STA R0, @0 #limita para 9
+PASSA_UN_S:
+LDA R0, @1 #carrega dezena de segundo
+CLT R0, @16 #verifica se menor 6
+JLT .PASSA_D_S
+LDI R0, $5 #carrega 5
+STA R0, @1 #limita para 5
+PASSA_D_S:
+LDA R0, @2 #carrega unidade de minuto
+CLT R0, @14 #verifica se menor 10
+JLT .PASSA_UN_M
+LDI R0, $9 #carrega 9
+STA R0, @2 #limita para 9
+PASSA_UN_M:
+LDA R0, @3 #carrega dezena de minuto
+CLT R0, @16 #verifica se menor 6
+JLT .PASSA_D_M
+LDI R0, $5 #carrega 5
+STA R0, @3 #limita para 5
+PASSA_D_M:
+LDA R0, @4 #carrega unidade de hora
+CLT R0, @18 #verifica se menor 4
+JLT .PASSA_UN_H
+LDI R0, $3 #carrega 3
+STA R0, @4 #limita para 3
+PASSA_UN_H:
+LDA R0, @5 #carrega dezena de hora
+CLT R0, @19 #verifica se menor 3
+JLT .PASSA_D_H
+LDI R0, $2 #carrega 2
+STA R0, @5 #limita para 2
+PASSA_D_H:
+RET
 
 CHECA_60:
 LDA R0, @0 #carrega unidade de segundo

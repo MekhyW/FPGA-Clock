@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 entity decoderInstru is
   port ( opcode : in std_logic_vector(4 downto 0);
-         saida : out std_logic_vector(12 downto 0)
+         saida : out std_logic_vector(14 downto 0)
   );
 end entity;
 
@@ -22,20 +22,24 @@ architecture comportamento of decoderInstru is
   constant RET : std_logic_vector(4 downto 0) := "01010";
   constant OP_AND : std_logic_vector(4 downto 0) := "01011";
   constant SOMAI : std_logic_vector(4 downto 0) := "01100";
+  constant CLT : std_logic_vector(4 downto 0) := "01101";
+  constant JLT : std_logic_vector(4 downto 0) := "01110";
 
   begin
-saida <= "0000000000000" when opcode = NOP else
-         "0000001011010" when opcode = LDA else
-         "0000001000010" when opcode = SOMA else
-			"0000011000000" when opcode = SOMAI else
-         "0000001001010" when opcode = SUB else
-         "0000011011000" when opcode = LDI else
-			"0000000011001" when opcode = STA else
-			"0100000000000" when opcode = JMP else
-			"0000100000000" when opcode = JEQ else
-			"0000000001110" when opcode = CEQ else
-			"1001000000000" when opcode = JSR else
-			"0010000000000" when opcode = RET else
-			"0000001110010" when opcode = OP_AND else
-         "0000000000000";  -- NOP para os opcodes Indefinidos
+saida <= "000000000000000" when opcode = NOP else
+         "000000001011010" when opcode = LDA else
+         "000000001000010" when opcode = SOMA else
+			"000000011000000" when opcode = SOMAI else
+         "000000001001010" when opcode = SUB else
+         "000000011011000" when opcode = LDI else
+			"000000000011001" when opcode = STA else
+			"000100000000000" when opcode = JMP else
+			"000000100000000" when opcode = JEQ else
+			"000000000001110" when opcode = CEQ else
+			"001001000000000" when opcode = JSR else
+			"000010000000000" when opcode = RET else
+			"000000001110010" when opcode = OP_AND else
+			"010000000001010" when opcode = CLT else
+			"100000000000000" when opcode = JLT else
+         "000000000000000";  -- NOP para os opcodes Indefinidos
 end architecture;

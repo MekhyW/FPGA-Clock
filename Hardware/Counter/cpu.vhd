@@ -21,7 +21,7 @@ architecture arquitetura of cpu is
   signal REG1_ULA_A : std_logic_vector (7 downto 0);
   signal Saida_ULA : std_logic_vector(7 downto 0);
   
-  signal Sinais_Controle : std_logic_vector (12 downto 0);
+  signal Sinais_Controle : std_logic_vector (14 downto 0);
   
   signal Endereco : std_logic_vector (9 downto 0);
   signal proxPC : std_logic_vector (9 downto 0);
@@ -42,6 +42,7 @@ architecture arquitetura of cpu is
   signal habMem_escrita : std_logic;
   signal JMP : std_logic;
   signal JEQ : std_logic;
+  signal JLT : std_logic;
   signal RET : std_logic;
   signal JSR : std_logic;
   signal Operacao_ULA : std_logic_vector(2 downto 0);
@@ -52,6 +53,10 @@ architecture arquitetura of cpu is
   signal flagIgual_uc : std_logic_vector(0 downto 0);
   signal selMux_pc : std_logic_vector(1 downto 0);
   signal endret : std_logic_vector(9 downto 0);
+  
+  signal habilitaFlag_less : std_logic;
+  signal flagLess_in : std_logic;
+  signal flagLess_uc : std_logic;
   
   alias opCode : std_logic_vector(4 downto 0) is instruction_in(16 downto 12);
   alias reg_sel : std_logic_vector(1 downto 0) is instruction_in(11 downto 10);
@@ -83,7 +88,8 @@ incrementaPC :  entity work.somaConstante  generic map (larguraDados => 10, cons
 
 -- O port map completo da ULA:
 ULA1 : entity work.ULA  generic map(larguraDados => 8)
-          port map (entradaA => REG1_ULA_A, entradaB => MUX_REG1, saida => Saida_ULA, seletor => Operacao_ULA, flagZero => flagIgual_in(0));
+          port map (entradaA => REG1_ULA_A, entradaB => MUX_REG1, saida => Saida_ULA, seletor => Operacao_ULA, 
+			 flagZero => flagIgual_in(0), flagLess => flagLess_in);
 
 			 
 ULA_SP : entity work.ULASomaSub  generic map(larguraDados => 3)
@@ -118,7 +124,11 @@ mux2: entity work.muxGenerico4x1 generic map(larguraDados => 10) port map( entra
                  saida_MUX => MUX_PC);
 					  
 flagIgual : entity work.registradorGenerico   generic map (larguraDados => 1)
-          port map (DIN => flagIgual_in, DOUT => flagIgual_uc, ENABLE => habilitaFlag_igual, CLK => CLK, RST => '0');
+          port map (DIN => flagIgual_in, DOUT => flagIgual_uc, ENABLE => habilitaFlag_igual, CLK => CLK, RST => RESET);
+			 
+			 
+flagLess : entity work.flipflopGenerico
+          port map (DIN => flagLess_in, DOUT => flagLess_uc, ENABLE => habilitaFlag_less, CLK => CLK, RST => RESET);
 			 
 
 data_address <= endereco_bus;
@@ -126,6 +136,8 @@ data_address <= endereco_bus;
 rom_address <= Endereco;
 data_out <= REG1_ULA_A;
 
+JLT <= Sinais_controle(14);
+habilitaFlag_less <= Sinais_controle(13);
 habilita_ret <= Sinais_Controle(12);
 JMP <= Sinais_Controle(11);
 RET <= Sinais_Controle(10);
@@ -147,7 +159,7 @@ Habilita_SP	<= '1' when (RET = '1' or JSR = '1') else
 
 
 selMux_pc <= "10" when (RET = '1') else
-				 "01" when (JMP = '1' or JSR = '1' or (JEQ = '1' and flagIgual_uc(0) = '1')) else
+				 "01" when (JMP = '1' or JSR = '1' or (JEQ = '1' and flagIgual_uc(0) = '1')  or (JLT = '1' and flagLess_uc = '1')) else
 				 "00";
 
 end architecture;
