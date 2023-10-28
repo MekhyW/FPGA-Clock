@@ -12,6 +12,7 @@ entity ULA is
       entradaA, entradaB:  in STD_LOGIC_VECTOR((larguraDados-1) downto 0);
       seletor:  in STD_LOGIC_VECTOR(2 downto 0);
       saida:    out STD_LOGIC_VECTOR((larguraDados-1) downto 0);
+		flagLess : out std_logic;
       flagZero: out std_logic
     );
 end entity;
@@ -25,14 +26,27 @@ architecture comportamento of ULA is
    signal op_or :     STD_LOGIC_VECTOR((larguraDados-1) downto 0);
    signal op_xor :    STD_LOGIC_VECTOR((larguraDados-1) downto 0);
    signal op_not :    STD_LOGIC_VECTOR((larguraDados-1) downto 0);
+	
+	signal A_extended : STD_LOGIC_VECTOR(larguraDados downto 0);
+	signal B_extended : STD_LOGIC_VECTOR(larguraDados downto 0);
+	signal subtracao_extended : STD_LOGIC_VECTOR(larguraDados downto 0);
 
     begin
+		
+		A_extended(larguraDados) <= '0';
+		A_extended((larguraDados-1) downto 0) <= entradaA;
+		
+		B_extended(larguraDados) <= '0';
+		B_extended((larguraDados-1) downto 0) <= entradaB;
+	 
+	 
       soma      <= STD_LOGIC_VECTOR(unsigned(entradaA) + unsigned(entradaB));
       subtracao <= STD_LOGIC_VECTOR(unsigned(entradaA) - unsigned(entradaB));
       op_and    <= entradaA and entradaB;
       op_or     <= entradaA or entradaB;
       op_xor    <= entradaA xor entradaB;
       op_not    <= not entradaA;
+		subtracao_extended <= STD_LOGIC_VECTOR(signed(A_extended) - signed(B_extended));
 
       saida <= soma when (seletor = "000") else
           subtracao when (seletor = "001") else
@@ -46,5 +60,6 @@ architecture comportamento of ULA is
 
       --flagZero <= '1' when unsigned(saida) = unsigned(zero) else '0';
       flagZero <= '1' when unsigned(saida) = 0 else '0';
+		flagLess <= '1' when subtracao_extended(larguraDados) = '1' else '0';
 
 end architecture;

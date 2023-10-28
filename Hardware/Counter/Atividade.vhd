@@ -41,6 +41,10 @@ signal addrDec : std_logic_vector(7 downto 0);
 signal Habilita_led : std_logic;
 signal Habilita_wr : std_logic;
 signal Habilita_rd : std_logic;
+signal Habilita_base : std_logic;
+signal Habilita_default : std_logic;
+
+signal base_out : std_logic_vector(7 downto 0);
 
 signal Habilita_sws : std_logic;
 signal Habilita_sw8 : std_logic;
@@ -50,14 +54,17 @@ signal auxK0 : std_logic;
 signal auxK1 : std_logic;
 signal k0_out : std_logic_vector(0 downto 0);
 signal k1_out : std_logic_vector(0 downto 0);
+signal time_out : std_logic;
 signal k0_reset : std_logic;
 signal k1_reset : std_logic;
+signal time_reset : std_logic;
 
 signal Habilita_key0 : std_logic;
 signal Habilita_key1 : std_logic;
 signal Habilita_key2 : std_logic;
 signal Habilita_key3 : std_logic;
 signal Habilita_reset : std_logic;
+signal Habilita_time : std_logic;
 
 signal hex0ToDec : std_logic_vector(3 downto 0);
 signal hex1ToDec : std_logic_vector(3 downto 0);
@@ -83,6 +90,13 @@ detectorSub0: work.edgeDetector(bordaSubida) port map (clk => CLOCK_50, entrada 
 detectorSub1: work.edgeDetector(bordaSubida) port map (clk => CLOCK_50, entrada => (not KEY(1)), saida => auxK1);
 
 
+interfaceBaseTempo : entity work.divisorGenerico_e_Interface
+              port map (clk => CLOCK_50,
+              limpaLeitura => time_reset,
+				  base_div => base_out,
+              leituraReg => time_out);
+
+
 proc : work.cpu port map(control_in => control_in, control_out => control_out, rom_address => rom_addr,
 								instruction_in => instruction, data_in => ramToCpu, data_out => cpuToRam, data_address => data_addr);
 
@@ -103,11 +117,15 @@ addControl :  entity work.decoder3x8
                  saida => addrDec);
 					  
 led_reg : entity work.registradorGenerico   generic map (larguraDados => 8)
-          port map (DIN => cpuToRam, DOUT => LEDR(7 downto 0), ENABLE => Habilita_led, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam, DOUT => LEDR(7 downto 0), ENABLE => Habilita_led, CLK => control_in(1), RST => control_in(0));
 
 
 wr_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
-          port map (DIN => cpuToRam(0 downto 0), DOUT => LEDR(8 downto 8), ENABLE => Habilita_wr, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(0 downto 0), DOUT => LEDR(8 downto 8), ENABLE => Habilita_wr, CLK => control_in(1), RST => control_in(0));
+
+			 
+base_reg : entity work.registradorGenerico   generic map (larguraDados => 8)
+          port map (DIN => cpuToRam, DOUT => base_out, ENABLE => Habilita_base, CLK => control_in(1), RST => control_in(0));
 			 
 			 
 k0_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
@@ -119,7 +137,7 @@ k1_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
 
 			 
 rd_reg : entity work.registradorGenerico   generic map (larguraDados => 1)
-          port map (DIN => cpuToRam(0 downto 0), DOUT => LEDR(9 downto 9), ENABLE => Habilita_rd, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(0 downto 0), DOUT => LEDR(9 downto 9), ENABLE => Habilita_rd, CLK => control_in(1), RST => control_in(0));
 
 hex0_dec :  entity work.conversorHex7Seg
             port map(dadoHex => hex0ToDec,
@@ -147,27 +165,27 @@ hex5_dec :  entity work.conversorHex7Seg
 			 
 
 hex0_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex0ToDec, ENABLE => Habilita_hex0, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex0ToDec, ENABLE => Habilita_hex0, CLK => control_in(1), RST => control_in(0));
 
 
 hex1_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex1ToDec, ENABLE => Habilita_hex1, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex1ToDec, ENABLE => Habilita_hex1, CLK => control_in(1), RST => control_in(0));
 			 
 			 
 hex2_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex2ToDec, ENABLE => Habilita_hex2, CLK => control_in(1), RST => '0');			 
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex2ToDec, ENABLE => Habilita_hex2, CLK => control_in(1), RST => control_in(0));			 
 
 
 hex3_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex3ToDec, ENABLE => Habilita_hex3, CLK => control_in(1), RST => '0');			 
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex3ToDec, ENABLE => Habilita_hex3, CLK => control_in(1), RST => control_in(0));			 
 
 
 hex4_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex4ToDec, ENABLE => Habilita_hex4, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex4ToDec, ENABLE => Habilita_hex4, CLK => control_in(1), RST => control_in(0));
 
 
 hex5_reg : entity work.registradorGenerico   generic map (larguraDados => 4)
-          port map (DIN => cpuToRam(3 downto 0), DOUT => hex5ToDec, ENABLE => Habilita_hex5, CLK => control_in(1), RST => '0');
+          port map (DIN => cpuToRam(3 downto 0), DOUT => hex5ToDec, ENABLE => Habilita_hex5, CLK => control_in(1), RST => control_in(0));
 
 buffer_8 :  entity work.buffer_3_state_8portas
         port map(entrada => SW(7 downto 0), habilita =>  Habilita_sws, saida => ramToCpu);
@@ -183,6 +201,9 @@ buffer_key0 :  entity work.buffer_3_state
 
 buffer_key1 :  entity work.buffer_3_state
         port map(entrada => k1_out(0), habilita =>  Habilita_key1, saida => ramToCpu(0));
+		  
+buffer_time :  entity work.buffer_3_state
+        port map(entrada => time_out, habilita =>  Habilita_time, saida => ramToCpu(0));
 
 buffer_key2 :  entity work.buffer_3_state
         port map(entrada => (not KEY(2)), habilita =>  Habilita_key2, saida => ramToCpu(0));
@@ -199,6 +220,7 @@ control_in(0) <= not(FPGA_RESET_N);
 Habilita_led <= (addrDec(0) and control_out(0) and blockDec(4) and (not(data_addr(5))));
 Habilita_wr <= (addrDec(1) and control_out(0) and blockDec(4) and (not(data_addr(5))));
 Habilita_rd <= (addrDec(2) and control_out(0) and blockDec(4) and (not(data_addr(5))));
+Habilita_base <= (addrDec(3) and control_out(0) and blockDec(4) and (not(data_addr(5))));
 
 
 Habilita_hex0 <= (addrDec(0) and control_out(0) and blockDec(4) and data_addr(5));
@@ -219,11 +241,16 @@ Habilita_key1 <= (addrDec(1) and control_out(1) and blockDec(5) and data_addr(5)
 Habilita_key2 <= (addrDec(2) and control_out(1) and blockDec(5) and data_addr(5));
 Habilita_key3 <= (addrDec(3) and control_out(1) and blockDec(5) and data_addr(5));
 Habilita_reset <= (addrDec(4) and control_out(1) and blockDec(5) and data_addr(5));
+Habilita_time <= (addrDec(5) and control_out(1) and blockDec(5) and data_addr(5));
+
 
 k0_reset <= (control_out(0) and data_addr(0) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
 data_addr(6) and data_addr(7) and data_addr(8));
 
 k1_reset <= (control_out(0) and (not(data_addr(0))) and data_addr(1) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
+data_addr(6) and data_addr(7) and data_addr(8));
+
+time_reset <= (control_out(0) and (data_addr(0)) and (not(data_addr(1))) and data_addr(2) and data_addr(3) and data_addr(4) and data_addr(5) and
 data_addr(6) and data_addr(7) and data_addr(8)); 
 
 end architecture;

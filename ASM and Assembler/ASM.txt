@@ -8,221 +8,299 @@ STA R0, .HEX2
 STA R0, .HEX3
 STA R0, .HEX4
 STA R0, .HEX5
-STA R0, @0 #unidade
-STA R0, @1 #dezena
-STA R0, @2 #centena
-STA R0, @3 #unidade de milhar
-STA R0, @4 #dezena de milhar
-STA R0, @5 #centena de milhar
+STA R0, @0 #unidade de segundo
+STA R0, @1 #dezena de segundo
+STA R0, @2 #unidade de minuto
+STA R0, @3 #dezena de minuto
+STA R0, @4 #unidade de hora
+STA R0, @5 #dezena de hora
 STA R0, @6 #flag inibe contagem
 STA R0, @15 #cte 0 para saber se botao esta solto
 LDI R1, $1
-STA R1, @13 #cte 1 para incrementar
+STA R1, .TIME_DIV #base de tempo por padrao 1 seg
 LDI R2, $10
-STA R2, @7 #limite unidade
-STA R2, @8 #limite dezena
-STA R2, @9 #limite centena
-STA R2, @10 #limite unidade de milhar
-STA R2, @11 #limite dezena de milhar
-STA R2, @12 #limite centena de milhar
 STA R2, @14 #cte 10 para verificar estouro
 STA R2, .CK0 #limpa k0
 STA R2, .CK1 #limpa k1
+STA R2, .CTIME #limpa tempo
+LDI R3, $6
+STA R3, @16 #cte 6 para verificar 60
+LDI R3, $2
+STA R3, @17 #cte 2 para verificar 24
+LDI R3, $4
+STA R3, @18 #cte 6 para verificar 24
+LDI R3, $3
+STA R3, @19 #cte 3 para verificar menor ou igual a 2
 
 MAIN:
 LDI R0, $0 #carrega zero
-CEQ R0, .K0  #ve se k0 esta pressionado
-JEQ .DEPOIS_DO_K0 #pula se estiver solto
+CEQ R0, .TIME  #ve se passou segundo
+JEQ .DEPOIS_DO_TIME #pula se estiver solto
 JSR .INC #incrementa contagem
-DEPOIS_DO_K0: 
+JSR .CHECA_60 #checa por carry de horario 
+DEPOIS_DO_TIME: 
 JSR .ATUALIZA_DISPLAY #atualiza info da memoria no display
 LDI R1, $0 #carrega zero
-CEQ R1, .K1 #ve se k1 esta pressionado
+CEQ R1, .K0 #ve se k0 esta pressionado
+JEQ .DEPOIS_DO_K0
+JSR .CONFIGURA_TEMPO #configura horario atual
+DEPOIS_DO_K0:
+LDI R2, $0 #carrega zero
+CEQ R2, .K1 #ve se k0 esta pressionado
 JEQ .DEPOIS_DO_K1
-JSR .ATUALIZA_LIMITE #atualiza limite da contagem
+JSR .MUDA_BASE #muda base de tempo
 DEPOIS_DO_K1:
-JSR .LIMITE #verifica limite da contagem
 JMP .MAIN #volta para o inicio do laco
 
 
-LIMITE:
-LDA R0, @0 #carrega unidade
-CEQ R0, @7 #compara com limite unidade
-JEQ .CONTINUA_UNIDADE #pula se for igual ou retorna
-RET 
-CONTINUA_UNIDADE:
-LDA R1, @1 #carrega dezena
-CEQ R1, @8 #compara com limite dezena
-JEQ .CONTINUA_DEZENA #pula se for igual ou retorna
-RET
-CONTINUA_DEZENA:
-LDA R2, @2 #carrega centena
-CEQ R2, @9 #compara com limite centena
-JEQ .CONTINUA_CENTENA #pula se for igual ou retorna
-RET
-CONTINUA_CENTENA:
-LDA R3, @3 #carrega unidade de milhar
-CEQ R3, @10 #compara com limite unidade de milhar
-JEQ .CONTINUA_U_MILHAR #pula se for igual ou retorna
-RET
-CONTINUA_U_MILHAR:
-LDA R0, @4 #carrega dezena de milhar
-CEQ R0, @11 #compara com limite dezena de milhar
-JEQ .CONTINUA_D_MILHAR #pula se for igual ou retorna
-RET
-CONTINUA_D_MILHAR:
-LDA R1, @5 #carrega centena de milhar
-CEQ R1, @12 #compara com limite centena de milhar
-JEQ .CONTINUA_C_MILHAR #pula se for igual ou retorna
-RET
-CONTINUA_C_MILHAR:
-LDI R2, $1 #carrega 1 para ativar flag
-STA R2, @6 #ativa flag inibe contagem
-STA R2, .LED8 #ativa led limite atingido
-RET #retorna
-
-
 ATUALIZA_DISPLAY:
-LDA R0, @0 #carrega unidade
+LDA R0, @0 #carrega unidade de segundo
 STA R0, .HEX0 #armazena em hex0
-LDA R1, @1 #carrega dezena
+LDA R1, @1 #carrega dezena de segundo
 STA R1, .HEX1 #armazena em hex1
-LDA R2, @2 #carrega centena
+LDA R2, @2 #carrega unidade de minuto
 STA R2, .HEX2 #armazena em hex2
-LDA R3, @3 #carrega unidade de milhar
+LDA R3, @3 #carrega dezena de minuto
 STA R3, .HEX3 #armazena em hex3
-LDA R0, @4 #carrega dezena de milhar
+LDA R0, @4 #carrega unidade de hora
 STA R0, .HEX4 #armazena em hex4
-LDA R1, @5 #carrega centena de milhar
+LDA R1, @5 #carrega dezena de hora
 STA R1, .HEX5 #armazena em hex5
 RET
 
 
 INC:
-STA R0, .CK0 #limpa K0
+STA R0, .CTIME #limpa tempo
 LDI R0, $0 #carrega zero
 CEQ R0, @6 #compara com flag inibe contagem e retorna se for diferente de zero 
 JEQ .FAZ_CONTAGEM 
 RET
 FAZ_CONTAGEM:
 LDA R1, @0 #carrega unidade
-SOMA R1, @13 #soma com um
+SOMAI R1, $1 #soma com um
 STA R1, @0 #armazena unidade
-CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_UN
+JSR .VERIFICA_ESTOURO #verifica estouro
 RET
-CARRY_UN:
+
+
+VERIFICA_ESTOURO:
+LDA R1, @0 #carrega unidade
+CEQ R1, @14 #compara com 10 para verificar estouro
+JEQ .CARRY_UN_S
+RET
+CARRY_UN_S:
 LDI R1, $0 #carrega zero
-STA R1, @0 #zera unidade
-LDA R1, @1 #carrega dezena
-SOMA R1, @13 #incrementa
-STA R1, @1 #armazena dezena
+STA R1, @0 #zera unidade seg
+LDA R1, @1 #carrega dezena seg
+SOMAI R1, $1 #incrementa
+STA R1, @1 #armazena dezena seg
 CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_D
+JEQ .CARRY_D_S
 RET
-CARRY_D:
+CARRY_D_S:
 LDI R2, $0 #carrega zero
-STA R2, @1 #zera dezena
-LDA R2, @2 #carrega centena
-SOMA R2, @13 #incrementa
-STA R2, @2 #armazena centena
+STA R2, @1 #zera dezena seg
+VERIFICA_ESTOURO_MINUTO:
+LDA R2, @2 #carrega unidade min
+SOMAI R2, $1 #incrementa
+STA R2, @2 #armazena unidade min
 CEQ R2, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_C
+JEQ .CARRY_UN_M
 RET
-CARRY_C:
+CARRY_UN_M:
 LDI R3, $0 #carrega zero
-STA R3, @2 #zera centena
-LDA R3, @3 #carrega unidade de milhar
-SOMA R3, @13 #incrementa
-STA R3, @3 #armazena unidade de milhar
+STA R3, @2 #zera unidade min
+LDA R3, @3 #carrega dezena min
+SOMAI R3, $1 #incrementa
+STA R3, @3 #armazena dezena min
 CEQ R3, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_U_MILHAR
+JEQ .CARRY_D_M
 RET
-CARRY_U_MILHAR:
+CARRY_D_M:
 LDI R0, $0 #carrega zero
-STA R0, @3 #zera unidade de milhar
-LDA R0, @4 #carrega dezena de milhar
-SOMA R0, @13 #incrementa
-STA R0, @4 #armazena dezena de milhar
+STA R0, @3 #zera dezena min
+VERIFICA_ESTOURO_HORA:
+LDA R0, @4 #carrega unidade hora
+SOMAI R0, $1 #incrementa
+STA R0, @4 #armazena unidade hora
 CEQ R0, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_D_MILHAR
+JEQ .CARRY_UN_H
 RET
-CARRY_D_MILHAR:
+CARRY_UN_H:
 LDI R1, $0 #carrega zero
-STA R1, @4 #zera dezena de milhar
-LDA R1, @5 #carrega centena de milhar
-SOMA R1, @13 #incrementa
-STA R1, @5 #armazena centena de milhar
+STA R1, @4 #zera unidade hora
+LDA R1, @5 #carrega dezena hora
+SOMAI R1, $1 #incrementa
+STA R1, @5 #armazena dezena hora
 CEQ R1, @14 #compara com 10 para verificar estouro
-JEQ .CARRY_C_MILHAR
+JEQ .CARRY_D_H
 RET
-CARRY_C_MILHAR:
+CARRY_D_H:
 LDI R2, $0 #carrega zero
-STA R2, @5 #zera centena de milhar
+STA R2, @5 #zera dezena hora
 LDI R2, $1 #carrega um
-STA R2, .LED9 #acende led de estouro
+STA R2, .LED9 #acende led de erro
 RET
 
 
-ATUALIZA_LIMITE:
+CONFIGURA_TEMPO:
+STA R0, .CK0 #limpa K0
 LDI R0, $1 #carrega um
-STA R0, .LEDS #ativa led0 pra indicar unidade
-LDI R0, $0 #carrega zero
-STA R0, .LED8 #limpa led limite
-STA R0, @6 #limpa flag inibe contagem
-STA R0, .CK1 #limpa k1
-ESPERA_UN:
-LDA R1, .K1 #carrega k1
+STA R0, .LEDS #ativa led0 pra indicar unidade segundo
+ESPERA_UN_S:
+LDA R1, .K0 #carrega k0
 CEQ R1, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_UN
+JEQ .ESPERA_UN_S
 LDA R1, .SWS #carrega chaves
-STA R1, @7 #armazena em limite unidades
-STA R1, .CK1 #limpa k1
+STA R1, @0 #armazena em unidade segundo
+STA R1, .CK0 #limpa k0
 LDI R1, $2 #carrega 2
 STA R1, .LEDS #ativa led1
-ESPERA_D:
-LDA R2, .K1 #carrega k1
+ESPERA_D_S:
+LDA R2, .K0 #carrega k0
 CEQ R2, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_D
+JEQ .ESPERA_D_S
 LDA R2, .SWS #carrega chaves
-STA R2, @8 #armazena em limite dezena
-STA R2, .CK1 #limpa k1
+STA R2, @1 #armazena em dezena segundo
+STA R2, .CK0 #limpa k0
 LDI R2, $4 #carrega 4
 STA R2, .LEDS #ativa led2
-ESPERA_C:
-LDA R3, .K1 #carrega k1
+ESPERA_UN_M:
+LDA R3, .K0 #carrega k0
 CEQ R3, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_C
+JEQ .ESPERA_UN_M
 LDA R3, .SWS #carrega chaves
-STA R3, @9 #armazena em limite centena
-STA R3, .CK1 #limpa k1
+STA R3, @2 #armazena em unidade minuto
+STA R3, .CK0 #limpa k0
 LDI R3, $8 #carrega 8
 STA R3, .LEDS #ativa led3
-ESPERA_U_MILHAR:
-LDA R0, .K1 #carrega k1
+ESPERA_D_M:
+LDA R0, .K0 #carrega k0
 CEQ R0, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_U_MILHAR
+JEQ .ESPERA_D_M
 LDA R0, .SWS #carrega chaves
-STA R0, @10 #armazena em limite unidade de milhar
-STA R0, .CK1 #limpa k1
+STA R0, @3 #armazena em dezena minuto
+STA R0, .CK0 #limpa k0
 LDI R0, $16 #carrega 16
 STA R0, .LEDS #ativa led4
-ESPERA_D_MILHAR:
-LDA R1, .K1 #carrega k1
+ESPERA_UN_H:
+LDA R1, .K0 #carrega k0
 CEQ R1, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_D_MILHAR
+JEQ .ESPERA_UN_H
 LDA R1, .SWS #carrega chaves
-STA R1, @11 #armazena em limite dezena de milhar
-STA R1, .CK1 #limpa k1
+STA R1, @4 #armazena em unidade hora
+STA R1, .CK0 #limpa k0
 LDI R1, $32 #carrega 32
 STA R1, .LEDS #ativa led5
-ESPERA_C_MILHAR:
-LDA R2, .K1 #carrega k1
+ESPERA_D_H:
+LDA R2, .K0 #carrega k0
 CEQ R2, @15 #compara com zero para saber se esta pressionado
-JEQ .ESPERA_C_MILHAR
+JEQ .ESPERA_D_H
 LDA R2, .SWS #carrega chaves
-STA R2, @12 #armazena em limite centena de milhar
-STA R2, .CK1 #limpa k1
+STA R2, @5 #armazena em dezena hora
+STA R2, .CK0 #limpa k0
 LDI R2, $0 #carrega 0
 STA R2, .LEDS #desativa leds
+JSR .VERIFICA_CONSISTENCIA
+STA R0, .CTIME #limpa tempo
 RET
+
+
+VERIFICA_CONSISTENCIA:
+LDA R0, @0 #carrega unidade de segundo
+CLT R0, @14 #verifica se menor 10
+JLT .PASSA_UN_S
+LDI R0, $9 #carrega 9
+STA R0, @0 #limita para 9
+PASSA_UN_S:
+LDA R0, @1 #carrega dezena de segundo
+CLT R0, @16 #verifica se menor 6
+JLT .PASSA_D_S
+LDI R0, $5 #carrega 5
+STA R0, @1 #limita para 5
+PASSA_D_S:
+LDA R0, @2 #carrega unidade de minuto
+CLT R0, @14 #verifica se menor 10
+JLT .PASSA_UN_M
+LDI R0, $9 #carrega 9
+STA R0, @2 #limita para 9
+PASSA_UN_M:
+LDA R0, @3 #carrega dezena de minuto
+CLT R0, @16 #verifica se menor 6
+JLT .PASSA_D_M
+LDI R0, $5 #carrega 5
+STA R0, @3 #limita para 5
+PASSA_D_M:
+LDA R0, @4 #carrega unidade de hora
+CLT R0, @18 #verifica se menor 4
+JLT .PASSA_UN_H
+LDI R0, $3 #carrega 3
+STA R0, @4 #limita para 3
+PASSA_UN_H:
+LDA R0, @5 #carrega dezena de hora
+CLT R0, @19 #verifica se menor 3
+JLT .PASSA_D_H
+LDI R0, $2 #carrega 2
+STA R0, @5 #limita para 2
+PASSA_D_H:
+RET
+
+CHECA_60:
+LDA R0, @0 #carrega unidade de segundo
+CEQ R0, @15 #compara com 0
+JEQ .DEPOIS_0_SEG #desvia se unidade for 0 seg ou retorna
+RET 
+DEPOIS_0_SEG:
+LDA R1, @1 #carrega dezena de segundo
+CEQ R1, @16 #compara com 6
+JEQ .MINUTO #desvia se dezena for 6 ou retorna
+RET
+MINUTO:
+LDI R0, $0 #carrega zero 
+STA R0, @0 #zera unidade segundo
+STA R0, @1 #zera dezena segundo
+JSR .VERIFICA_ESTOURO_MINUTO #soma 1 no minuto e confere estouro
+LDA R0, @2 #carrega unidade minuto
+CEQ R0, @15 #compara com 0
+JEQ .DEPOIS_0_MIN #desvia se unidade for 0 min ou retorna
+RET 
+DEPOIS_0_MIN:
+LDA R1, @3 #carrega dezena de minuto
+CEQ R1, @16 #compara com 6
+JEQ .HORA #desvia se dezena for 6 ou retorna
+RET
+HORA:
+LDI R0, $0 #carrega zero 
+STA R0, @2 #zera unidade min
+STA R0, @3 #zera dezena min
+JSR .VERIFICA_ESTOURO_HORA #soma 1 na hora e confere estouro
+LDA R0, @4 #carrega unidade de hora
+CEQ R0, @18 #compara com 4
+JEQ .DEPOIS_4_HOR #desvia se unidade for 4 horas ou retorna
+RET 
+DEPOIS_4_HOR:
+LDA R1, @5 #carrega dezena de hora
+CEQ R1, @17 #compara com 2
+JEQ .ZERA_HORA #desvia se dezena for 6 ou retorna
+RET
+ZERA_HORA:
+LDI R0, $0 #carrega zero 
+STA R0, @4 #zera unidade hora
+STA R0, @5 #zera dezena hora
+RET
+
+
+MUDA_BASE:
+STA R1, .CK1 #limpa k1
+ESPERA:
+LDA R2, .K1 #carrega k1
+CEQ R2, @15 #compara com zero para saber se esta pressionado
+JEQ .ESPERA
+LDA R1, .SWS #carrega chaves
+STA R1, .TIME_DIV #armazena o numero de vezes mais rapido que a base de tempo alternativa eh
+STA R1, .CK1 #limpa k1
+LDI R1, $100 #carrega 100
+RET
+
+
+
