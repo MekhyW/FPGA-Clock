@@ -21,7 +21,7 @@ architecture arquitetura of cpu is
   signal REG1_ULA_A : std_logic_vector (7 downto 0);
   signal Saida_ULA : std_logic_vector(7 downto 0);
   
-  signal Sinais_Controle : std_logic_vector (14 downto 0);
+  signal Sinais_Controle : std_logic_vector (13 downto 0);
   
   signal Endereco : std_logic_vector (9 downto 0);
   signal proxPC : std_logic_vector (9 downto 0);
@@ -48,7 +48,6 @@ architecture arquitetura of cpu is
   signal Operacao_ULA : std_logic_vector(2 downto 0);
   
   signal habilitaFlag_igual : std_logic;
-  signal habilita_ret : std_logic;
   signal flagIgual_in : std_logic_vector(0 downto 0);
   signal flagIgual_uc : std_logic_vector(0 downto 0);
   signal selMux_pc : std_logic_vector(1 downto 0);
@@ -136,9 +135,8 @@ data_address <= endereco_bus;
 rom_address <= Endereco;
 data_out <= REG1_ULA_A;
 
-JLT <= Sinais_controle(14);
-habilitaFlag_less <= Sinais_controle(13);
-habilita_ret <= Sinais_Controle(12);
+JLT <= Sinais_controle(13);
+habilitaFlag_less <= Sinais_controle(12);
 JMP <= Sinais_Controle(11);
 RET <= Sinais_Controle(10);
 JSR <= Sinais_Controle(9);

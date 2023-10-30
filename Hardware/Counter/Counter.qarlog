@@ -1,7 +1,7 @@
 Quartus Prime Archive log --	C:/Descomp/Counter/Counter.qarlog
 
 Archive:	C:/Descomp/Counter/Counter.qar
-Date:		Wed Oct 18 23:07:11 2023
+Date:		Mon Oct 30 12:57:04 2023
 Quartus Prime		20.1.0 Build 711 06/05/2020 SJ Lite Edition
 
 	=========== Files Selected: ===========
@@ -17,7 +17,10 @@ C:/Descomp/Counter/conversorHex7Seg.vhd
 C:/Descomp/Counter/cpu.vhd
 C:/Descomp/Counter/decoder3x8.vhd
 C:/Descomp/Counter/decoderInstru.vhd
+C:/Descomp/Counter/divisorGenerico.vhd
+C:/Descomp/Counter/divisorGenerico_e_Interface.vhd
 C:/Descomp/Counter/edgeDetector.vhd
+C:/Descomp/Counter/flipflopGenerico.vhd
 C:/Descomp/Counter/memoriaRAM.vhd
 C:/Descomp/Counter/memoriaROM.vhd
 C:/Descomp/Counter/muxGenerico2x1.vhd
@@ -25,7 +28,7 @@ C:/Descomp/Counter/muxGenerico4x1.vhd
 C:/Descomp/Counter/registradorGenerico.vhd
 C:/Descomp/Counter/somaConstante.vhd
 c:/intelfpga_lite/20.1/quartus/bin64/assignment_defaults.qdf
-	======= Total: 20 files to archive =======
+	======= Total: 23 files to archive =======
 
 	================ Status: ===============
 All files archived successfully.

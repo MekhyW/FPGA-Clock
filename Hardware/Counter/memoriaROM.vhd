@@ -289,14 +289,6 @@ tmp(248) := LDI & "01" & "00" & x"64";	-- LDI R1, $100 	#carrega 100
 tmp(249) := RET & "00" & "00" & x"00";	-- RET
 
 
-
-
-
-
-
-
-
-
         return tmp;
     end initMemory;
 
